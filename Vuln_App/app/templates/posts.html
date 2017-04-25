@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>  </h3>
+{% autoescape false %}
+<div>
+	       {% for post in posts %}
+	           <div class="large-4 small-4 columns">
+	           	<p> {{post.body}}</p>
+	           	<p> By: {{post.author.first_name}}</p>
+	           	<p> Time: {{post.timestamp}}</p>
+	           </div>
+	       {% endfor %}
+</div>
+{% endautoescape %}
+<div>
+		  <form action="" method="POST" class="form-horizontal">
+		    <h2>Write a new comment:</h2>
+		    <div class="control-group">
+		        <div class="controls">
+		          <input type="text" id="body" name="body" class="input-xlarge"
+		            placeholder="Enter comment">
+		        </div>
+		    </div>
+		 
+		    <div class="control-group">
+		        <div class="controls">
+		          <button type="submit" class="btn btn-success">Submit</button>
+		        </div>
+		    </div>
+		  </form>
+</div>
+{% endblock %}
