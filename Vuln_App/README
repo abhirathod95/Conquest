@@ -1,3 +1,5 @@
 Steps to run the app:
 1) First you need to run "pip install -r requirements.txt". This will install all the required packages for the web app.
 2) Go inside the Vuln_App folder and run "python run.py". This should start the web app on localhost on port 5000. 
+
+If you need to clear out the database (usernames and passwords), uncomment the db.drop_all() line in __init__.py and run it again. You can comment it back in after running it once if you like.
