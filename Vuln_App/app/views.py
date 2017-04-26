@@ -20,48 +20,50 @@ def index():
 
 @app.route('/register' , methods=['GET','POST'])
 def register():
-	if request.method == 'GET':
-		return render_template('register.html')
-	user = User(request.form['first'], request.form['last'], request.form['email'], request.form['password'])
-	db.session.add(user)
-	db.session.commit()
-	flash('User successfully registered')
-	return redirect(url_for('login'))
+	if request.method == 'POST':
+		user = User(request.form['first'], request.form['last'], request.form['email'], request.form['password'])
+		db.session.add(user)
+		db.session.commit()
+		flash('User successfully registered')
+		return redirect(url_for('login'))
+	return render_template('register.html')
+	
  
 @app.route('/login', methods=['GET','POST'])
 def login():
-	if request.method == 'GET':
-		return render_template('login.html')
-	email = request.form['email']
-	password = request.form['password'] 
-	#sql_query = 'SELECT * FROM user where email="{}" AND password="{}"'.format(email, password)
-	#print(sql_query)
-	registered_user = User.query.filter_by(email=email, password=password).first()
-	print(registered_user)
-	if registered_user is None:
-		flash('Username or Password is invalid' , 'error')
-		return redirect(url_for('login'))
-	login_user(registered_user)
-	flash('Logged in successfully')
-	if request.args.get('next'):
-		return redirect(request.args.get('next'))
-	else:
-		return redirect(url_for('posts'))
+	if request.method == 'POST':
+		email = request.form['email']
+		password = request.form['password'] 
+		#sql_query = 'SELECT * FROM user where email="{}" AND password="{}"'.format(email, password)
+		#print(sql_query)
+		registered_user = User.query.filter_by(email=email, password=password).first()
+		print(registered_user)
+		if registered_user is None:
+			flash('Username or Password is invalid' , 'error')
+			return redirect(url_for('login'))
+		login_user(registered_user)
+		flash('Logged in successfully')
+		if request.args.get('next'):
+			return redirect(request.args.get('next'))
+		else:
+			return redirect(url_for('posts'))
+	return render_template('login.html')
 
 @app.route('/logout')
 def logout():
 	logout_user()
+	g.user = None
 	return redirect(url_for('index'))
 
 @app.route('/posts', methods=['GET', 'POST'])
-@login_required
 def posts():
 	if request.method == "POST":
-			post = Post(request.form["body"], current_user.get_id())
+			if current_user.get_id():
+				post = Post(request.form["body"], current_user.get_id())
+			else:
+				post = Post(request.form["body"], -1)
 			db.session.add(post)
 			db.session.commit()
 			return redirect(url_for('posts'))
 	posts = Post.query.all()
-	for post in posts:
-		print(post.author)
 	return render_template("posts.html", posts=reversed(posts))
