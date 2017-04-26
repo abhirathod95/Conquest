@@ -1,5 +1,5 @@
 import sys
-from subprocess import call
+import httplib2
 from bs4 import BeautifulSoup
 
 
@@ -7,10 +7,20 @@ if len(sys.argv) < 2:
 	print('Pass at least a target domain to attack.')
 	sys.exit()
 
-# Takes a domain to run a nikto scan on; output is a .txt file. Script will wait until subprocess completes
-call('nikto -o test.txt -h ' + sys.argv[1], shell=True)
+target = sys.argv[1]
+h = httplib2.Http()
+existingPages = []
 
-with open('test.txt') as nikto_output:
-	for line in nikto_output:
-		continue
-# gonna wait to see what the site looks like before parsing
+resp = h.request(target+'/login', 'GET')
+
+
+with open('./files-and-directories.txt') as browselist:
+	for newline in browselist:
+		line = newline.rstrip('\n')
+		# Try a HEAD request to the server with directory from the list.
+		resp = h.request(target+'/'+line, 'HEAD')
+		# If the returned status code is not in the 400s or 500s, page exists.
+		if int(resp[0]['status']) < 400:
+			existingPages.append(line)
+
+print(existingPages)
