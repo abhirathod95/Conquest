@@ -1,0 +1,80 @@
+Star Wars|8.8|Action, Adventure, Fantasy, Sci-Fi|PG|1977
+Finding Nemo|8.1|Animation, Adventure, Comedy, Family|G|2003
+Forrest Gump|8.7|Drama, Romance|PG-13|1994
+Pirates of the Caribbean: The Curse of the Black Pearl|8.0|Action, Adventure, Fantasy|PG-13|2003
+Eternal Sunshine of the Spotless Mind|8.4|Drama, Romance, Sci-Fi|R|2004
+Twelve Monkeys|8.1|Mystery, Sci-Fi, Thriller|R|1995
+Memento|8.6|Mystery, Thriller|R|2000
+Raiders of the Lost Ark|8.6|Action, Adventure|PG|1981
+Gladiator|8.5|Action, Adventure, Drama|R|2000
+Snatch.|8.3|Crime, Thriller|R|2000
+Pretty Woman|6.8|Comedy, Romance|R|1990
+The Lord of the Rings: The Fellowship of the Ring|8.8|Action, Adventure, Fantasy|PG-13|2001
+The Lord of the Rings: The Two Towers|8.7|Action, Adventure, Fantasy|PG-13|2002
+The Lord of the Rings: The Return of the King|8.9|Action, Adventure, Fantasy|PG-13|2003
+O Brother, Where Art Thou?|7.8|Comedy, Adventure, Crime, Music|12|2000
+Donnie Darko|8.1|Drama, Mystery, Sci-Fi|R|2001
+Lost in Translation|7.8|Drama|R|2003
+The Dark Knight|9.0|Action, Crime, Drama, Thriller|PG-13|2008
+Minority Report|7.7|Action, Mystery, Sci-Fi, Thriller|PG-13|2002
+Amelia|5.7|Adventure, Biography, Drama, Romance|PG|2009
+Braveheart|8.4|Action, Biography, Drama, History, War|R|1995
+The Godfather|9.2|Crime, Drama|R|1972
+High Fidelity|7.5|Comedy, Drama, Music, Romance|R|2000
+Batman Begins|8.3|Action, Adventure, Crime, Drama|PG-13|2005
+Batman Begins|8.3|Action, Adventure, Crime, Drama|PG-13|2005
+Fargo|8.2|Crime, Drama, Thriller|R|1996
+Terminator 2: Judgment Day|8.6|Action, Sci-Fi, Thriller|R|1991
+Jurassic Park|8.0|Adventure, Sci-Fi|PG-13|1993
+Batman Forever|5.4|Action, Adventure, Fantasy|PG-13|1995
+Schindler's List|8.9|Biography, Drama, History, War|R|1993
+A Beautiful Mind|8.1|Biography, Drama|PG-13|2001
+Erin Brockovich|7.2|Biography, Drama|R|2000
+Fight Club|8.9|Drama|R|1999
+Spider-Man 2|7.4|Action, Adventure, Fantasy|PG-13|2004
+Apollo 13|7.5|Adventure, Drama, History|PG|1995
+Dances with Wolves|8.0|Adventure, Drama, Western|PG-13|1990
+Monsters, Inc.|8.0|Animation, Adventure, Comedy, Family, Fantasy|G|2001
+Titanic|7.6|Drama, Romance|PG-13|1997
+The Matrix|8.7|Action, Adventure, Sci-Fi|R|1999
+The Matrix Reloaded|7.1|Action, Sci-Fi|R|2003
+Men in Black|7.2|Comedy, Sci-Fi|PG-13|1997
+The Usual Suspects|8.7|Crime, Mystery, Thriller|R|1995
+Catch Me If You Can|7.9|Biography, Comedy, Crime, Drama|PG-13|2002
+Requiem for a Dream|8.4|Drama|R|2000
+Twister|6.1|Action, Adventure, Drama, Thriller|PG-13|1996
+Harry Potter and the Sorcerer's Stone|7.3|Adventure, Family, Fantasy|PG|2001
+Harry Potter and the Chamber of Secrets|7.2|Adventure, Family, Fantasy, Mystery|PG|2002
+Pulp Fiction|9.0|Crime, Drama, Thriller|R|1994
+V for Vendetta|8.2|Action, Crime, Fantasy, Mystery, Sci-Fi, Thriller|R|2005
+Almost Famous|7.9|Drama, Music|R|2000
+Mrs. Doubtfire|6.7|Comedy, Drama|PG-13|1993
+Seven Pounds|7.5|Drama|PG-13|2008
+Shrek|7.9|Animation, Adventure, Comedy, Family, Fantasy|PG|2001
+Aladdin|7.9|Animation, Adventure, Comedy, Family, Fantasy, Musical, Romance|G|1992
+The Mask|6.8|Comedy, Crime, Fantasy, Romance|PG-13|1994
+Der Soldat James Ryan|8.6|Action, Drama, War|16|1998
+Mission: Impossible - Ghost Protocol|7.4|Action, Thriller|PG-13|2011
+Mission: Impossible II|5.9|Action, Adventure, Thriller|PG-13|2000
+Die Hard: With a Vengeance|7.5|Action, Crime, Thriller|R|1995
+Meet the Parents|7.0|Comedy, Romance|PG-13|2000
+Speed|7.2|Action, Thriller|R|1994
+Star Wars: Episode V - The Empire Strikes Back|8.8|Action, Adventure, Sci-Fi|PG|1980
+Star Wars: Episode VI - Return of the Jedi|8.4|Action, Adventure, Fantasy, Sci-Fi|PG|1983
+Traffic|7.7|Crime, Drama, Thriller|R|2000
+The Patriot|7.0|Action, Drama, War|R|2000
+The Bourne Supremacy|7.7|Action, Crime, Thriller|T|2004
+Ace Ventura: Pet Detective|6.8|Comedy|PG-13|1994
+Charlie's Angels|5.5|Action, Adventure, Comedy, Crime, Thriller|PG-13|2000
+The Fugitive|7.8|Action, Adventure, Crime, Mystery, Thriller|PG-13|1993
+Chicken Run|7.1|Animation, Family, Comedy|G|2000
+Cast Away|7.6|Adventure, Drama|PG-13|2000
+Dumb &amp; Dumber|7.2|Comedy|PG-13|1994
+Clear and Present Danger|6.8|Action, Drama, Thriller|PG-13|1994
+Unbreakable|7.2|Drama, Mystery, Sci-Fi, Thriller|PG-13|2000
+The Rock|7.3|Action, Adventure, Thriller|R|1996
+The Incredibles|8.0|Animation, Action, Adventure, Family|PG|2004
+Beauty and the Beast|8.0|Animation, Family, Fantasy, Musical, Romance|G|1991
+Women vs. Men|5.4|Comedy|R|2002
+X2|7.5|Action, Adventure, Sci-Fi, Thriller|PG-13|2003
+True Lies|7.2|Action, Thriller|R|1994

@@ -4,6 +4,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 
 User = models.User
 Post = models.Post
+Movie = models.Movie
 
 @app.before_request
 def before_request():
@@ -36,6 +37,7 @@ def login():
 		password = request.form['password'] 
 		#sql_query = 'SELECT * FROM user where email="{}" AND password="{}"'.format(email, password)
 		#print(sql_query)
+		#
 		registered_user = User.query.filter_by(email=email, password=password).first()
 		print(registered_user)
 		if registered_user is None:
@@ -55,7 +57,8 @@ def logout():
 	g.user = None
 	return redirect(url_for('index'))
 
-@app.route('/posts', methods=['GET', 'POST'])
+@app.route('/forum', methods=['GET', 'POST'])
+@login_required
 def posts():
 	if request.method == "POST":
 			if current_user.get_id():
@@ -66,4 +69,26 @@ def posts():
 			db.session.commit()
 			return redirect(url_for('posts'))
 	posts = Post.query.all()
-	return render_template("posts.html", posts=reversed(posts))
+	return render_template("forum.html", posts=reversed(posts))
+
+@app.route('/movies', methods=["GET"])
+def movies():
+	try:
+		if request.args.get("search"):
+			#movies = Movie.query.filter(Movie.title.contains(word)).all()
+			word = request.args.get("search")
+			sql_query = "SELECT * FROM movie WHERE title LIKE '%{}%'".format(word)
+			print(sql_query)
+			result = db.session.execute(sql_query).fetchall()
+			movies = []
+			for movie in result:
+				movies.append(Movie(movie[1], movie[2], movie[3], movie[4], movie[5]))
+		else:
+			movies = Movie.query.all()
+	except Exception as e:
+		movies = [{"title": "N/A",
+				  "rating": "N/A",
+				  "rated" : "N/A",
+				  "year" : "N/A",
+				  "genre" : "N/A"}]
+	return render_template("movies.html", movies=movies)

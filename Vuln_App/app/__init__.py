@@ -10,5 +10,6 @@ lm = LoginManager()
 lm.init_app(app)
 
 from app import models, views
-#db.drop_all()
 db.create_all()
+#db.drop_all()
+#models.Post.__table__.drop(db.engine)

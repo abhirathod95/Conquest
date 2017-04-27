@@ -47,3 +47,21 @@ class Post(db.Model):
 
 	def __repr__(self):
 		return '<Post %r>' % (self.body)
+
+class Movie(db.Model):
+	id = db.Column(db.Integer, primary_key = True)
+	title = db.Column(db.String())
+	year = db.Column(db.Integer)
+	rating = db.Column(db.Integer)
+	rated = db.Column(db.String())
+	genre = db.Column(db.String())
+
+	def __init__(self, title, rating, genre, rated, year):
+		self.title = title
+		self.year = year
+		self.rating = rating
+		self.rated = rated
+		self.genre = genre
+
+	def __repr__(self):
+		return '<Title: %r Year:%r Rating:%r Rated:%r Genre:%r>' % (self.title, self.year, self.rating, self.rated, self.genre)
