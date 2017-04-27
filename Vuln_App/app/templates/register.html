@@ -1,43 +1,27 @@
 {% extends "base.html" %}
 {% block content %}
-  <form action="" method=post class="form-horizontal">
-    <h2>Sign up for Conquest Web Demo Application </h2>
-    <div class="control-group">
-        <div class="controls">
-          <input type="text" id="first" name="first" class="input-xlarge"
-            placeholder="Enter First Name" value="{{ request.form.first }}"
-            required>
-        </div>
-    </div>
-
-    <div class="control-group">
-        <div class="controls">
-          <input type="text" id="last" name="last" class="input-xlarge"
-            placeholder="Enter Last Name" value="{{ request.form.last }}"
-            required>
-        </div>
-    </div>
-
-    <div class="control-group">
-        <div class="controls">
-          <input type="email" id="email" name="email" class="input-xlarge"
-            placeholder="Enter Email" value="{{ request.form.email }}"
-            required>
-        </div>
-    </div>
- 
-    <div class="control-group">
-        <div class="controls">
-          <input type="password" id="password" name="password" class="input-xlarge"
-            placeholder="Enter Password" value="{{ request.form.password }}"
-            required>
-        </div>
-    </div>
- 
-    <div class="control-group">
-        <div class="controls">
-          <button type="submit" class="btn btn-success">Signup</button>
-        </div>
-    </div>
-  </form>
+<div class="container">
+    <center>
+        <form action="" method="POST" class="form-horizontal">
+            <div class="row">
+                <h2>Sign Up Now!</h2>
+            </div>
+            <div class="row">
+                <input type="text" id="first" name="first" placeholder="Enter First Name" required>
+            </div>
+            <div class="row">
+                <input type="text" id="last" name="last" placeholder="Enter Last Name" required>
+            </div>
+            <div class="row">
+                <input type="text" id="email" name="email" placeholder="Enter Email" required>
+            </div>
+            <div class="row">
+                <input type="text" id="password" name="password" placeholder="Enter Password" required>
+            </div>
+            <div>
+                <button type="submit" class="btn btn-success">Register</button>
+            </div>
+        </form>
+    </center>
+</div>
 {% endblock %}

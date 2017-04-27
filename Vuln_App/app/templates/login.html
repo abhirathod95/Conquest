@@ -1,25 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
-  <form action="" method=post class="form-horizontal">
-    <h2>Signin to Conquest Web Demo Application </h2>
-    <div class="control-group">
-        <div class="controls">
-          <input type="text" id="email" name="email" class="input-xlarge"
-            placeholder="Enter Email">
-        </div>
-    </div>
- 
-    <div class="control-group">
-        <div class="controls">
-          <input type="password" id="password" name="password" class="input-xlarge"
-            placeholder="Enter Password">
-        </div>
-    </div>
- 
-    <div class="control-group">
-        <div class="controls">
-          <button type="submit" class="btn btn-success">Signin</button>
-        </div>
-    </div>
-  </form>
+<div class="container">
+    <center>
+        <form action="" method="POST" class="form-horizontal">
+            <div class="row">
+                <h2>Log In</h2>
+            </div>
+            <div class="row">
+                <input type="text" id="email" name="email" class="input-xlarge" placeholder="Enter Email">
+            </div>
+            <div class="row">
+                <input type="password" id="password" name="password" class="input-xlarge"
+                placeholder="Enter Password">
+            </div>
+            <div>
+                <button type="submit" class="btn btn-success">Signin</button>
+            </div>
+        </form>
+    </center>
+</div>
+
 {% endblock %}
