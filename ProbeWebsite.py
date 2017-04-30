@@ -19,27 +19,34 @@ def probeFoundSQLiVulnerability(html, targetURL, inputField):
 	name = inputField.attrs['name']
 	id = str(inputField.attrs['id'])
 	placeholder = str(inputField.attrs['placeholder'])
+	isSearchQuery = False
 	if(placeholder and id) :
 		isSearchQuery = 'results' in placeholder or 'Results' in placeholder or 'RESULTS' in placeholder
 		isSearchQuery = isSearchQuery or 'search' in placeholder or 'Search' in placeholder or 'SEARCH' in placeholder
 		isSearchQuery = isSearchQuery or 'find' in placeholder or 'Find' in placeholder or 'FIND' in placeholder
 		isSearchQuery = isSearchQuery or 'search' in id or 'Search' in id or 'SEARCH' in id
-		queryURL = targetURL + "?" + name + "=" + probeText
-		html2 = urllib.urlopen(queryURL).read()
-		if(html2) :
-			html2 = BeautifulSoup(html2, "lxml")
-			tableEntries = html2.find_all('td')
-			noEntries = tableEntries.__len__() == 0
-			brokeQuery = True
-			if(not noEntries) :
-				for entry in tableEntries :
-					brokeQuery = brokeQuery and ("NA" in str(entry) or "N/A" in str(entry))
-			if (noEntries or brokeQuery) and isSearchQuery :
-				return probeText
-			else :
-				probeText = "hi"
+	queryURL = targetURL + "?" + name + "=" + probeText
+	html2 = urllib.urlopen(queryURL).read()
+	if(html2) :
+		html2 = BeautifulSoup(html2, "lxml")
+		tableEntries = html2.find_all('td')
+		noEntries = tableEntries.__len__() == 0
+		brokeQuery = True
+		if(not noEntries) :
+			for entry in tableEntries :
+				brokeQuery = brokeQuery and ("NA" in str(entry) or "N/A" in str(entry))
+		if (noEntries or brokeQuery) and isSearchQuery :
+			return probeText
 		else :
-			pass
+			containsError = "error" in html2.text or "Error" in html2.text or "ERROR" in html2.text
+			containsSQL = "syntax" in html2.text or "Syntax" in html2.text or "SYNTAX" in html2.text
+			containsSQL = containsSQL or "sql" in html2.text or "SQL" in html2.text or "Sql" in html2.text
+			containsSQL = containsSQL or "query" in html2.text or "Query" in html2.text or "QUERY" in html2.text
+			if(containsError and containsSQL) :
+				return probeText
+	else :
+		pass
+
 	return
 
 def examineForVulnerabilities(html, targetURL, element):
