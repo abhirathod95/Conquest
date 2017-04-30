@@ -127,5 +127,4 @@ def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', 
 					# for each kind of SQL, check for SQL, store in file buffer, print to screen, and if vulnerable, add to vulnerabilities
 
 
-probeTheWebsite()
 print(str(vulnerabilityCounter) + " vulnerabilities found!\n")
