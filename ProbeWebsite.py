@@ -19,26 +19,28 @@ def probeFoundSQLiVulnerability(html, targetURL, inputField):
 	name = inputField.attrs['name']
 	id = str(inputField.attrs['id'])
 	placeholder = str(inputField.attrs['placeholder'])
-	isSearchQuery = 'results' in placeholder or 'Results' in placeholder or 'RESULTS' in placeholder
-	isSearchQuery = isSearchQuery or 'search' in placeholder or 'Search' in placeholder or 'SEARCH' in placeholder
-	isSearchQuery = isSearchQuery or 'find' in placeholder or 'Find' in placeholder or 'FIND' in placeholder
-	isSearchQuery = isSearchQuery or 'search' in id or 'Search' in id or 'SEARCH' in id
-	queryURL = targetURL + "?" + name + "=" + probeText
-	html2 = urllib.urlopen(queryURL).read()
-	if(html2) :
-		html2 = BeautifulSoup(html2, "lxml")
-		tableEntries = html2.find_all('td')
-		brokeQuery = tableEntries.__len__() == 0
-		if(not brokeQuery) :
+	if(placeholder and id) :
+		isSearchQuery = 'results' in placeholder or 'Results' in placeholder or 'RESULTS' in placeholder
+		isSearchQuery = isSearchQuery or 'search' in placeholder or 'Search' in placeholder or 'SEARCH' in placeholder
+		isSearchQuery = isSearchQuery or 'find' in placeholder or 'Find' in placeholder or 'FIND' in placeholder
+		isSearchQuery = isSearchQuery or 'search' in id or 'Search' in id or 'SEARCH' in id
+		queryURL = targetURL + "?" + name + "=" + probeText
+		html2 = urllib.urlopen(queryURL).read()
+		if(html2) :
+			html2 = BeautifulSoup(html2, "lxml")
+			tableEntries = html2.find_all('td')
+			noEntries = tableEntries.__len__() == 0
 			brokeQuery = True
-			for entry in tableEntries :
-				brokeQuery = brokeQuery and ("NA" in str(entry) or "N/A" in str(entry))
-		if brokeQuery and isSearchQuery :
-			return probeText
-	else :
-		pass
-	return  # temp value until function is actually implemened
-
+			if(not noEntries) :
+				for entry in tableEntries :
+					brokeQuery = brokeQuery and ("NA" in str(entry) or "N/A" in str(entry))
+			if (noEntries or brokeQuery) and isSearchQuery :
+				return probeText
+			else :
+				probeText = "hi"
+		else :
+			pass
+	return
 
 def examineForVulnerabilities(html, targetURL, element):
 	global vulnerabilityCounter
@@ -53,7 +55,7 @@ def examineForVulnerabilities(html, targetURL, element):
 			print(
 			"XSS VULNERABILITY FOUND: " + str(element) + " on page " + targetURL + ". Javascript validation is broken.\n")
 		else:
-			print("No XSS vulnerabilities immediately found for " + str(element) + " on page " + targetURL + "\n")
+			print("No XSS vulnerabilities immediately found for " + str(element) + " on page " + targetURL + "\nEither element is not vulnerable, or website is good about not leaking information.\n	")
 	else:
 		print("Probing with sample input to test for XSS vulnerabilities\n")
 		isVulnerable = probeFoundXSSVulnerability(html, targetURL, element)
@@ -62,7 +64,7 @@ def examineForVulnerabilities(html, targetURL, element):
 			vulnerabilityCounter += 1
 			print("XSS VULERABILITY FOUND: " + str(element) + " on page " + targetURL + ". Found using probe-text: " + isVulnerable + "\n")
 		else:
-			print("No XSS vulnerabilities immediately found for " + str(element) + " on page " + targetURL + "\n")
+			print("No XSS vulnerabilities immediately found for " + str(element) + " on page " + targetURL + "\nEither element is not vulnerable, or website is good about not leaking information.\n")
 			print("Probing with sample input to test for SQL-injection vulnerabilities\n")
 			isVulnerable = probeFoundSQLiVulnerability(html, targetURL, element)
 			if (isVulnerable):
@@ -70,7 +72,7 @@ def examineForVulnerabilities(html, targetURL, element):
 				vulnerabilityCounter += 1
 				print("SQLi VULNERABILITY FOUND: " + str(element) + " on page " + targetURL + ". Found using probe-text: " + isVulnerable + "\n")
 			else:
-				print("No SQLi vulnerabilities immediately found for " + str(element) + " on page " + targetURL + "\n")
+				print("No SQLi vulnerabilities immediately found for " + str(element) + " on page " + targetURL + "\nEither element is not vulnerable, or website is good about not leaking information.\n")
 	return pageExploits
 
 def probeTheWebsite(targetPage=['', 'login', 'register', 'movies']):
