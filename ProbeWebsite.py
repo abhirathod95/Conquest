@@ -2,7 +2,6 @@ import urllib2
 import urllib
 from bs4 import BeautifulSoup
 
-baseURL = "http://127.0.0.1:5000"
 vulnerabilities = {}
 vulnerabilityCounter = 0
 
@@ -20,7 +19,8 @@ def examineJavascriptForXSS(html, targetURL, inputField):
 
 
 def probeFoundXSSVulnerability(html, targetURL, inputField):
-	return  # temp value until function is actually implemented
+	probeText = "<script></script>"
+	return
 
 
 def probeFoundSQLiVulnerability(html, targetURL, inputField):
@@ -84,31 +84,31 @@ def examineForVulnerabilities(html, targetURL, element):
 
 	return pageExploits
 
-def probeTheWebsite(authorization=None, targetPage=['', 'login', 'register', 'movies', 'forum']):
-	authorization = ('a', 'a')		# need to remove this after integrating with rest of project
-
+def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', '/register', '/movies', '/forum'], authenticatedSession=None):
 	global vulnerabilities
-	if (targetPage == ['', 'login', 'register', 'movies']):
+	if (targetPage == ['', 'login', 'register', 'movies', 'forum']):
 		print("No target URL extensions specified, defaulting to base list. Not likely to find much!!!!\n\n")
 	for restOfURL in targetPage:
-		targetURL = baseURL + '/' + restOfURL
+		targetURL = baseURL + restOfURL
 		currentPageExploits = {}
-		if(authorization) :
-			credentials(targetURL, authorization[0], authorization[1])
+		if(authenticatedSession) :
+			print("Passed an authenticated session! Trying all pages.\n")
+		else:
+			print("Passed in an unauthenticated session. Trying all pages that don't require authentication. Results may be LIMITED.\n")
 		try :
-			html = urllib2.urlopen(targetURL).read()
+			html = urllib2.urlopen(targetURL).read()  #TODO TODO TODO TODO
 		except :									# if html gets a 401 unauthorized error
-			print("Cannot get to this page without authorization. Register for an account and rerun this method and pass this credentials as the first parameter. Ex: probeTheWebsite((username, password), targetURLs)")
-			if(authorization) :
+			print("Cannot get to this page without authorization. Obtain an account with proper authorization and rerun this program.")
+			if(authenticatedSession) :
 				# data = urllib.urlencode({"email" : authorization[0], "password" : authorization[1]})
 				# urllib.urlopen(baseURL + "/login", data)
 				try :
 					html = urllib2.urlopen(targetURL).read()
 				except :
 					print("Credentials were not valid, or another problem happened after attempting to authenticate for URL: " + targetURL)
+					continue
 		if (html):
 			html = BeautifulSoup(html, "lxml")
-
 			if "404" in html.text:
 				print("Request for " + targetURL + " returned 404 error\n")
 				continue
@@ -120,10 +120,11 @@ def probeTheWebsite(authorization=None, targetPage=['', 'login', 'register', 'mo
 					currentPageExploits.update(examineForVulnerabilities(html, targetURL, inputField))
 				for textArea in textAreas:
 					currentPageExploits.update(examineForVulnerabilities(html, targetURL, textArea))
-		vulnerabilities[targetURL] = currentPageExploits
-				# for each kind of XSS, check for XSS, store in file buffer, print to screen, and if vulnerable, add to vulnerabilities
 
-				# for each kind of SQL, check for SQL, store in file buffer, print to screen, and if vulnerable, add to vulnerabilities
+	vulnerabilities[targetURL] = currentPageExploits
+					# for each kind of XSS, check for XSS, store in file buffer, print to screen, and if vulnerable, add to vulnerabilities
+
+					# for each kind of SQL, check for SQL, store in file buffer, print to screen, and if vulnerable, add to vulnerabilities
 
 
 probeTheWebsite()
