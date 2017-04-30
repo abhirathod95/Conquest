@@ -93,3 +93,8 @@ def movies():
 				  "year" : "None",
 				  "genre" : "None"}]
 	return render_template("movies.html", movies=movies)
+
+@app.route('/movies/<int:movie_id>', methods=["GET"])
+def movie_profile(movie_id):
+	movie = Movie.query.filter_by(id=movie_id).first()
+	return render_template("movie.html", movie=movie)
