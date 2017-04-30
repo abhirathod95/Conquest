@@ -9,23 +9,31 @@ import requests
 existingPages = []
 alreadySpidered = []
 
-existingPagesAuth = []
-alreadySpideredAuth = []
-
 s = requests.session()
 
+
+# Spider method works for our demo website with just 5 lines or so
+# but needs loads more code for compatibility with other websites.
 def spider():
 	while set(existingPages) != set(alreadySpidered):
 		for page in existingPages:
 			if page not in alreadySpidered:
-				resp = s.get(baseURL + page).content
+				resp = s.get(baseURL + page, allow_redirects=False).content
+				# print('spidering: '+page)
 				alreadySpidered.append(page)
-				# print('spidering: ' + page)
-				for link in BeautifulSoup(resp, "html.parser", parse_only=SoupStrainer('a')):
-					if link.has_attr('href') and link['href'] not in existingPages:
-						existingPages.append(link['href'])
+				for spiderLink in BeautifulSoup(resp, "html.parser", parse_only=SoupStrainer('a')):
+					if spiderLink.has_attr('href') and (spiderLink['href'] not in existingPages):
+						spiderLink = spiderLink['href']
+						if 'http' in spiderLink:
+							# print('link: ' + spiderLink)
+							if urlnohttp in spiderLink:
+								existingPages.append(spiderLink.split(urlnohttp, 1)[1])
+								# print('appended: ' + spiderLink.split(urlnohttp, 1)[1])
+						elif '/' in spiderLink:
+							# print('appended elif: ' + spiderLink)
+							existingPages.append(spiderLink)
 
-# Target domain entered as command line argument.
+# Target domain entered as command line argument. Set up authenticate flags.
 baseURL = sys.argv[len(sys.argv) - 1]
 parser = argparse.ArgumentParser()
 parser.add_argument('-u', action='store', dest='username', help='Flag to set username.')
@@ -41,7 +49,9 @@ automate_login = False
 h = httplib2.Http()
 status, response = h.request(baseURL)
 soup = BeautifulSoup(response, "html.parser")
+urlnohttp = baseURL.split('://', 1)[1]
 
+# Set authenticate boolean.
 print('Target domain: ' + baseURL)
 if(username is not None) and (password is not None):
 	automate_login = True
@@ -53,13 +63,21 @@ else:
 # Initial spider (unauthenticated).
 for link in BeautifulSoup(response, "html.parser", parse_only=SoupStrainer('a')):
 	if link.has_attr('href'):
-		existingPages.append(link['href'])
+		link = link['href']
+		# Covers hrefs that are the entire domain.
+		if 'http' in link:
+			# print('link: '+link)
+			if urlnohttp in link:
+				existingPages.append(link.split(urlnohttp, 1)[1])
+				# print('appended: ' + link.split(urlnohttp, 1)[1])
+		# For hrefs that are just the directory.
+		elif '/' in link:
+			# print('appended elif: ' + link)
+			existingPages.append(link)
 
+# print('initial spider: ' + str(existingPages))
 spider()
 print('Finished unauthenticated spider. Found pages: ' + str(existingPages))
-
-
-#############################################################################
 
 if automate_login:
 	# # Do authentication if credentials provided.
@@ -73,20 +91,11 @@ if automate_login:
 	# 		print('not found')
 
 	url = 'http://localhost:5000/login'
-	values = {'email': '1', 'password': '1'}
+	values = {'email': username, 'password': password}
 
 	s.post(url, data=values)
-	print('cookie: '+ str(s.cookies.get_dict()))
-
-	existingPagesAuth = existingPages[:]
-	alreadySpideredAuth = alreadySpidered[:]
-	existingPages = []
 	alreadySpidered = []
 
-	# Initial spider (authenticated).
-	for link in BeautifulSoup(response, "html.parser", parse_only=SoupStrainer('a')):
-		if link.has_attr('href'):
-			existingPages.append(link['href'])
 	spider()
 	print('Finished authenticated spider. Found pages: ' + str(existingPages))
 
