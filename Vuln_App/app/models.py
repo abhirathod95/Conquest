@@ -27,10 +27,10 @@ class User(db.Model):
 		return False
 
 	def get_id(self):
-		try:
-			return unicode(self.id)  # python 2
-		except NameError:
-			return str(self.id)  # python 3
+		return str(self.id)  # python 3
+
+	def set_id(self, num):
+		self.id = num
 
 	def __repr__(self):
 		return '<User %r %r>' % (self.first_name, self.last_name)
