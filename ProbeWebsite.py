@@ -1,3 +1,4 @@
+import urllib2
 import urllib
 from bs4 import BeautifulSoup
 
@@ -5,6 +6,14 @@ baseURL = "http://127.0.0.1:5000"
 vulnerabilities = {}
 vulnerabilityCounter = 0
 
+
+
+def credentials(url, username, password):				# this code provided freely by the helpful contributors at http://stackoverflow.com/questions/40221579/http-error-401-unauthorized-using-urllib-request-urlopen
+    p = urllib2.HTTPPasswordMgrWithDefaultRealm()
+    p.add_password(None, url, username, password)
+    handler = urllib2.HTTPBasicAuthHandler(p)
+    opener = urllib2.build_opener(handler)
+    urllib2.install_opener(opener)
 
 def examineJavascriptForXSS(html, targetURL, inputField):
 	return False  # temp value until function is actually implemented
@@ -26,7 +35,7 @@ def probeFoundSQLiVulnerability(html, targetURL, inputField):
 		isSearchQuery = isSearchQuery or 'find' in placeholder or 'Find' in placeholder or 'FIND' in placeholder
 		isSearchQuery = isSearchQuery or 'search' in id or 'Search' in id or 'SEARCH' in id
 	queryURL = targetURL + "?" + name + "=" + probeText
-	html2 = urllib.urlopen(queryURL).read()
+	html2 = urllib2.urlopen(queryURL).read()
 	if(html2) :
 		html2 = BeautifulSoup(html2, "lxml")
 		tableEntries = html2.find_all('td')
@@ -72,26 +81,34 @@ def examineForVulnerabilities(html, targetURL, element):
 			print("XSS VULERABILITY FOUND: " + str(element) + " on page " + targetURL + ". Found using probe-text: " + isVulnerable + "\n")
 		else:
 			print("No XSS vulnerabilities immediately found for " + str(element) + " on page " + targetURL + "\nEither element is not vulnerable, or website is good about not leaking information.\n")
-			print("Probing with sample input to test for SQL-injection vulnerabilities\n")
-			isVulnerable = probeFoundSQLiVulnerability(html, targetURL, element)
-			if (isVulnerable):
-				pageExploits["SQLi" + str(targetURL)] = str(element)
-				vulnerabilityCounter += 1
-				print("SQLi VULNERABILITY FOUND: " + str(element) + " on page " + targetURL + ". Found using probe-text: " + isVulnerable + "\n")
-			else:
-				print("No SQLi vulnerabilities immediately found for " + str(element) + " on page " + targetURL + "\nEither element is not vulnerable, or website is good about not leaking information.\n")
+
 	return pageExploits
 
-def probeTheWebsite(targetPage=['', 'login', 'register', 'movies']):
+def probeTheWebsite(authorization=None, targetPage=['', 'login', 'register', 'movies', 'forum']):
+	authorization = ('a', 'a')		# need to remove this after integrating with rest of project
+
 	global vulnerabilities
 	if (targetPage == ['', 'login', 'register', 'movies']):
 		print("No target URL extensions specified, defaulting to base list. Not likely to find much!!!!\n\n")
 	for restOfURL in targetPage:
 		targetURL = baseURL + '/' + restOfURL
 		currentPageExploits = {}
-		html = urllib.urlopen(targetURL).read()
+		if(authorization) :
+			credentials(targetURL, authorization[0], authorization[1])
+		try :
+			html = urllib2.urlopen(targetURL).read()
+		except :									# if html gets a 401 unauthorized error
+			print("Cannot get to this page without authorization. Register for an account and rerun this method and pass this credentials as the first parameter. Ex: probeTheWebsite((username, password), targetURLs)")
+			if(authorization) :
+				# data = urllib.urlencode({"email" : authorization[0], "password" : authorization[1]})
+				# urllib.urlopen(baseURL + "/login", data)
+				try :
+					html = urllib2.urlopen(targetURL).read()
+				except :
+					print("Credentials were not valid, or another problem happened after attempting to authenticate for URL: " + targetURL)
 		if (html):
 			html = BeautifulSoup(html, "lxml")
+
 			if "404" in html.text:
 				print("Request for " + targetURL + " returned 404 error\n")
 				continue
@@ -104,10 +121,10 @@ def probeTheWebsite(targetPage=['', 'login', 'register', 'movies']):
 				for textArea in textAreas:
 					currentPageExploits.update(examineForVulnerabilities(html, targetURL, textArea))
 		vulnerabilities[targetURL] = currentPageExploits
-		print(str(vulnerabilityCounter) + " vulnerabilities found!\n")
 				# for each kind of XSS, check for XSS, store in file buffer, print to screen, and if vulnerable, add to vulnerabilities
 
 				# for each kind of SQL, check for SQL, store in file buffer, print to screen, and if vulnerable, add to vulnerabilities
 
 
 probeTheWebsite()
+print(str(vulnerabilityCounter) + " vulnerabilities found!\n")
