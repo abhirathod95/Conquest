@@ -90,14 +90,14 @@ def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', 
 		targetURL = baseURL + restOfURL
 		currentPageExploits = {}
 		try :
-			html = session.get(targetURL).content  #TODO TODO TODO TODO
+			html = session.get(targetURL)
 		except :									# if html gets a 401 unauthorized error
 			print("Cannot get to this page without authorization. Obtain an account with proper authorization and rerun this program.")
 			if(authenticatedSession) :
 				# data = urllib.urlencode({"email" : authorization[0], "password" : authorization[1]})
 				# urllib.urlopen(baseURL + "/login", data)
 				try :
-					html = session(targetURL).content
+					html = session.get(targetURL)
 				except :
 					print("Credentials were not valid, or another problem happened after attempting to authenticate for URL: " + targetURL)
 					continue
@@ -120,5 +120,5 @@ def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', 
 
 					# for each kind of SQL, check for SQL, store in file buffer, print to screen, and if vulnerable, add to vulnerabilities
 
-
+probeTheWebsite()
 print(str(vulnerabilityCounter) + " vulnerabilities found!\n")
