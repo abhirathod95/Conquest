@@ -29,7 +29,7 @@
 		    <tbody>
 		    	{% for movie in movies %}
 			    	<tr>
-			    		{%if movie.id != -1 %}
+			    		{%if movie.id > -1 %}
 				        	<td><a href="/movies/{{movie.id}}">{{movie.title}}</a></td>
 				        {% else %}
 				        	<td>{{movie.title}}</td>

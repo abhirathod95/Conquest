@@ -45,7 +45,7 @@ def login():
 		if not result:
 			flash('Username or Password is invalid!' , 'error')
 			return redirect(url_for('login'))
-			
+
 		registered_user = User(result[1], result[2], result[3], result[4])
 		registered_user.set_id(result[0])
 		#registered_user = User.query.filter_by(email=email, password=password).first()
@@ -95,9 +95,10 @@ def movies():
 			result = [(-1, "No Results Found", '', '', '', '')]
 
 		for movie in result:
-			movies.append(Movie(movie[1], movie[2], movie[3], movie[4], movie[5]))
+			movies.append(Movie(movie[1], movie[2], movie[3], movie[4], movie[5], num_id=movie[0]))
 	else:
 		movies = Movie.query.all()
+	print(movies)
 	return render_template("movies.html", movies=movies)
 
 @app.route('/movies/<int:movie_id>', methods=["GET"])
