@@ -25,7 +25,7 @@ def register():
 		user = User(request.form['first'], request.form['last'], request.form['email'], request.form['password'])
 		db.session.add(user)
 		db.session.commit()
-		flash('User successfully registered')
+		flash('User successfully registered. Please sign in!')
 		return redirect(url_for('login'))
 	return render_template('register.html')
 	
@@ -35,16 +35,17 @@ def login():
 	if request.method == 'POST':
 		email = request.form['email']
 		password = request.form['password'] 
-		#sql_query = 'SELECT * FROM user where email="{}" AND password="{}"'.format(email, password)
-		#print(sql_query)
-		#
-		registered_user = User.query.filter_by(email=email, password=password).first()
-		print(registered_user)
-		if registered_user is None:
-			flash('Username or Password is invalid' , 'error')
+		sql_query = 'SELECT * FROM user where email="{}" AND password="{}"'.format(email, password)
+		print(sql_query)
+		result = db.session.execute(sql_query).fetchone()
+		print(result)
+		if not result:
+			flash('Username or Password is invalid!' , 'error')
 			return redirect(url_for('login'))
+		registered_user = User(result[1], result[2], result[3], result[4])
+		registered_user.set_id(result[0])
+		#registered_user = User.query.filter_by(email=email, password=password).first()
 		login_user(registered_user)
-		flash('Logged in successfully')
 		if request.args.get('next'):
 			return redirect(request.args.get('next'))
 		else:
@@ -86,9 +87,14 @@ def movies():
 		else:
 			movies = Movie.query.all()
 	except Exception as e:
-		movies = [{"title": "N/A",
-				  "rating": "N/A",
-				  "rated" : "N/A",
-				  "year" : "N/A",
-				  "genre" : "N/A"}]
+		movies = [{"title": "None",
+				  "rating": "None",
+				  "rated" : "None",
+				  "year" : "None",
+				  "genre" : "None"}]
 	return render_template("movies.html", movies=movies)
+
+@app.route('/movies/<int:movie_id>', methods=["GET"])
+def movie_profile(movie_id):
+	movie = Movie.query.filter_by(id=movie_id).first()
+	return render_template("movie.html", movie=movie)
