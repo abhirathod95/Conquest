@@ -3,14 +3,16 @@
 <div class="container">
 	<div class="row">
 		<div class="col">
-			<form method="GET">
-			    <div class="input-group">
-			    	<input type="text" id="search" name="search" class="form-control" placeholder="Movie's name..">
-			    	<span class="input-group-btn">
-			    		<button class="btn btn-secondary" type="submit">Go!</button>
-			    	</span>
-			    </div>
-	    	</form>
+			{% autoescape false %}
+				<form method="GET">
+				    <div class="input-group">
+				    	<input type="text" id="search" name="search" class="form-control" placeholder="Movie's name..">
+				    	<span class="input-group-btn">
+				    		<button class="btn btn-secondary" type="submit">Go!</button>
+				    	</span>
+				    </div>
+		    	</form>
+			{% endautoescape %}
 		</div>
 	</div>
 	<div class="row">
@@ -27,7 +29,11 @@
 		    <tbody>
 		    	{% for movie in movies %}
 			    	<tr>
-				        <td><a href="/movies/{{movie.id}}">{{movie.title}}</a></td>
+			    		{%if movie.id != -1 %}
+				        	<td><a href="/movies/{{movie.id}}">{{movie.title}}</a></td>
+				        {% else %}
+				        	<td>{{movie.title}}</td>
+				        {% endif %}
 				        <td>{{movie.rating}}</td>
 				        <td>{{movie.genre}}</td>
 				        <td>{{movie.rated}}</td>

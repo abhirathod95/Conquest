@@ -56,7 +56,9 @@ class Movie(db.Model):
 	rated = db.Column(db.String())
 	genre = db.Column(db.String())
 
-	def __init__(self, title, rating, genre, rated, year):
+	def __init__(self, title, rating, genre, rated, year, num_id=None):
+		if num_id:
+			self.id = num_id
 		self.title = title
 		self.year = year
 		self.rating = rating

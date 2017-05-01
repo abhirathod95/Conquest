@@ -37,11 +37,15 @@ def login():
 		password = request.form['password'] 
 		sql_query = 'SELECT * FROM user where email="{}" AND password="{}"'.format(email, password)
 		print(sql_query)
-		result = db.session.execute(sql_query).fetchone()
-		print(result)
+		try:
+			result = db.session.execute(sql_query).fetchone()
+		except Exception as e:
+			result = None
+
 		if not result:
 			flash('Username or Password is invalid!' , 'error')
 			return redirect(url_for('login'))
+			
 		registered_user = User(result[1], result[2], result[3], result[4])
 		registered_user.set_id(result[0])
 		#registered_user = User.query.filter_by(email=email, password=password).first()
@@ -74,24 +78,26 @@ def posts():
 
 @app.route('/movies', methods=["GET"])
 def movies():
-	try:
-		if request.args.get("search"):
-			#movies = Movie.query.filter(Movie.title.contains(word)).all()
-			word = request.args.get("search")
-			sql_query = "SELECT * FROM movie WHERE title LIKE '%{}%'".format(word)
-			print(sql_query)
+	if request.args.get("search"):
+		movies = []
+		word = request.args.get("search")
+		sql_query = "SELECT * FROM movie WHERE title LIKE '%{}%'".format(word)
+		print(sql_query)
+		#movies = Movie.query.filter(Movie.title.contains(word)).all()
+		#print(movies)
+
+		try:
 			result = db.session.execute(sql_query).fetchall()
-			movies = []
-			for movie in result:
-				movies.append(Movie(movie[1], movie[2], movie[3], movie[4], movie[5]))
-		else:
-			movies = Movie.query.all()
-	except Exception as e:
-		movies = [{"title": "None",
-				  "rating": "None",
-				  "rated" : "None",
-				  "year" : "None",
-				  "genre" : "None"}]
+		except Exception as e:
+			result = [(-1, "Error: You have an error in your SQL syntax", '', '', '', '')]
+
+		if not result:
+			result = [(-1, "No Results Found", '', '', '', '')]
+
+		for movie in result:
+			movies.append(Movie(movie[1], movie[2], movie[3], movie[4], movie[5]))
+	else:
+		movies = Movie.query.all()
 	return render_template("movies.html", movies=movies)
 
 @app.route('/movies/<int:movie_id>', methods=["GET"])
