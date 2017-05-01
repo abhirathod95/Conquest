@@ -1,13 +1,14 @@
+import requests
 from bs4 import BeautifulSoup
 
 vulnerabilities = {}
 vulnerabilityCounter = 0
 
-def examineJavascriptForXSS(html, targetURL, inputField):
+def examineJavascriptForXSS(html, targetURL, inputField, session):
 	return False  # temp value until function is actually implemented
 
 
-def probeFoundXSSVulnerability(html, targetURL, inputField):
+def probeFoundXSSVulnerability(html, targetURL, inputField, session):
 	probeText = "<script></script>"
 	return
 
@@ -26,7 +27,7 @@ def probeFoundSQLiVulnerability(html, targetURL, inputField, session):
 	queryURL = targetURL + "?" + name + "=" + probeText
 	html2 = session.get((queryURL)).content
 	if(html2) :
-		html2 = BeautifulSoup(html2, "lxml")
+		html2 = BeautifulSoup(html2, "html.parser")
 		tableEntries = html2.find_all('td')
 		noEntries = tableEntries.__len__() == 0
 		brokeQuery = True
@@ -47,13 +48,13 @@ def probeFoundSQLiVulnerability(html, targetURL, inputField, session):
 
 	return
 
-def examineForVulnerabilities(html, targetURL, element):
+def examineForVulnerabilities(html, targetURL, element, session):
 	global vulnerabilityCounter
 	pageExploits = {}
 	print("Checking " + str(element) + " on page " + targetURL + " for XSS\n")
 	if ".js" in str(element):
 		print("Examining javascript code for XSS vulnerabilities\n")
-		jsIsVulnerableToXSS = examineJavascriptForXSS(html, targetURL, element)
+		jsIsVulnerableToXSS = examineJavascriptForXSS(html, targetURL, element, session)
 		if (jsIsVulnerableToXSS):
 			pageExploits["XSS" + str(vulnerabilityCounter)] = str(element)
 			vulnerabilityCounter += 1
@@ -63,7 +64,7 @@ def examineForVulnerabilities(html, targetURL, element):
 			print("No XSS vulnerabilities immediately found for " + str(element) + " on page " + targetURL + "\nEither element is not vulnerable, or website is good about not leaking information.\n	")
 	else:
 		print("Probing with sample input to test for XSS vulnerabilities\n")
-		isVulnerable = probeFoundXSSVulnerability(html, targetURL, element)
+		isVulnerable = probeFoundXSSVulnerability(html, targetURL, element, session)
 		if (isVulnerable):
 			pageExploits["XSS" + str(vulnerabilityCounter)] = str(element)
 			vulnerabilityCounter += 1
@@ -75,18 +76,18 @@ def examineForVulnerabilities(html, targetURL, element):
 
 def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', '/register', '/movies', '/forum'], authenticatedSession=None):
 	global vulnerabilities
+	session = None
+	if (authenticatedSession):
+		session = authenticatedSession
+		print("Passed an authenticated session! Trying all pages.\n")
+	else:
+		session = requests.Session()
+		print("Passed in an unauthenticated session. Trying all pages that don't require authentication. Results may be LIMITED.\n")
 	if (targetPage == ['', 'login', 'register', 'movies', 'forum']):
 		print("No target URL extensions specified, defaulting to base list. Not likely to find much!!!!\n\n")
 	for restOfURL in targetPage:
 		targetURL = baseURL + restOfURL
 		currentPageExploits = {}
-		session = None
-		if(authenticatedSession) :
-			session = authenticatedSession
-			print("Passed an authenticated session! Trying all pages.\n")
-		else:
-			session
-			print("Passed in an unauthenticated session. Trying all pages that don't require authentication. Results may be LIMITED.\n")
 		try :
 			html = session.get(targetURL).content  #TODO TODO TODO TODO
 		except :									# if html gets a 401 unauthorized error
@@ -100,7 +101,7 @@ def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', 
 					print("Credentials were not valid, or another problem happened after attempting to authenticate for URL: " + targetURL)
 					continue
 		if (html):
-			html = BeautifulSoup(html, "lxml")
+			html = BeautifulSoup(html, "html.parser")
 			if "404" in html.text:
 				print("Request for " + targetURL + " returned 404 error\n")
 				continue
@@ -109,9 +110,9 @@ def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', 
 				inputFields = form.find_all('input')
 				textAreas = form.find_all('textarea')
 				for inputField in inputFields:
-					currentPageExploits.update(examineForVulnerabilities(html, targetURL, inputField))
+					currentPageExploits.update(examineForVulnerabilities(html, targetURL, inputField, session))
 				for textArea in textAreas:
-					currentPageExploits.update(examineForVulnerabilities(html, targetURL, textArea))
+					currentPageExploits.update(examineForVulnerabilities(html, targetURL, textArea, session))
 
 	vulnerabilities[targetURL] = currentPageExploits
 					# for each kind of XSS, check for XSS, store in file buffer, print to screen, and if vulnerable, add to vulnerabilities
@@ -119,5 +120,5 @@ def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', 
 					# for each kind of SQL, check for SQL, store in file buffer, print to screen, and if vulnerable, add to vulnerabilities
 
 
-print(str(vulnerabilityCounter) + " vulnerabilities found!\n")
 probeTheWebsite()
+print(str(vulnerabilityCounter) + " vulnerabilities found!\n")
