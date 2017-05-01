@@ -9,45 +9,15 @@ def examineJavascriptForXSS(html, targetURL, inputField, session):
 
 
 def probeFoundXSSVulnerability(html, targetURL, inputField, session):
-	probeText = "<script></script>"
+    probeText = "<script></script>"
+    data = {"body" : probeText, "placeholder" : probeText, "text" : probeText}
+    try :
+        session.post(targetURL, data)
+    except :
+        print("Unable to access webpage.")
+    return
 
-	return
 
-
-def probeFoundSQLiVulnerability(html, targetURL, inputField, session):
-	probeText = "'"
-	name = inputField.attrs['name']
-	id = str(inputField.attrs['id'])
-	placeholder = str(inputField.attrs['placeholder'])
-	isSearchQuery = False
-	if(placeholder and id) :
-		isSearchQuery = 'results' in placeholder or 'Results' in placeholder or 'RESULTS' in placeholder
-		isSearchQuery = isSearchQuery or 'search' in placeholder or 'Search' in placeholder or 'SEARCH' in placeholder
-		isSearchQuery = isSearchQuery or 'find' in placeholder or 'Find' in placeholder or 'FIND' in placeholder
-		isSearchQuery = isSearchQuery or 'search' in id or 'Search' in id or 'SEARCH' in id
-	queryURL = targetURL + "?" + name + "=" + probeText
-	html2 = session.get((queryURL)).content
-	if(html2) :
-		html2 = BeautifulSoup(html2, "html.parser")
-		tableEntries = html2.find_all('td')
-		noEntries = tableEntries.__len__() == 0
-		brokeQuery = True
-		if(not noEntries) :
-			for entry in tableEntries :
-				brokeQuery = brokeQuery and ("NA" in str(entry) or "N/A" in str(entry))
-		if (noEntries or brokeQuery) and isSearchQuery :
-			return probeText
-		else :
-			containsError = "error" in html2.text or "Error" in html2.text or "ERROR" in html2.text
-			containsSQL = "syntax" in html2.text or "Syntax" in html2.text or "SYNTAX" in html2.text
-			containsSQL = containsSQL or "sql" in html2.text or "SQL" in html2.text or "Sql" in html2.text
-			containsSQL = containsSQL or "query" in html2.text or "Query" in html2.text or "QUERY" in html2.text
-			if(containsError and containsSQL) :
-				return probeText
-	else :
-		pass
-
-	return
 
 def examineForVulnerabilities(html, targetURL, element, session):
 	global vulnerabilityCounter
@@ -102,7 +72,7 @@ def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', 
 					print("Credentials were not valid, or another problem happened after attempting to authenticate for URL: " + targetURL)
 					continue
 		if (html):
-			html = BeautifulSoup(html, "html.parser")
+			html = BeautifulSoup(html.content, "html.parser")
 			if "404" in html.text:
 				print("Request for " + targetURL + " returned 404 error\n")
 				continue
@@ -120,5 +90,4 @@ def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', 
 
 					# for each kind of SQL, check for SQL, store in file buffer, print to screen, and if vulnerable, add to vulnerabilities
 
-probeTheWebsite()
 print(str(vulnerabilityCounter) + " vulnerabilities found!\n")
