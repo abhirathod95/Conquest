@@ -5,12 +5,12 @@ import argparse
 from bs4 import BeautifulSoup, SoupStrainer
 
 import requests
+#import ProbeWebsite
 
 existingPages = []
 alreadySpidered = []
 
 s = requests.session()
-
 
 # Spider method works for our demo website with just 5 lines or so
 # but needs loads more code for compatibility with other websites.
@@ -77,29 +77,36 @@ for link in BeautifulSoup(response, "html.parser", parse_only=SoupStrainer('a'))
 
 # print('initial spider: ' + str(existingPages))
 spider()
-print('Finished unauthenticated spider. Found pages: ' + str(existingPages))
+if not automate_login:
+	print('Finished unauthenticated spider. Found pages: ' + str(existingPages))
+	#ProbeWebsite.probeTheWebsite(baseURL, existingPages, None)
+
 
 if automate_login:
-	# # Do authentication if credentials provided.
-	# loginPages = ['', 'login', 'login.php', 'signin', 'signin.php']
-	# for loginPage in loginPages:
-	# 	print('Iterating login pages: ' + loginPage)
-	# 	resp = h.request(baseURL + '/' + loginPage, 'GET')
-	# 	if int(resp[0]['status']) < 400:
-	# 		print('found')
-	# 	else:
-	# 		print('not found')
+	# Do authentication if credentials provided.
+	loginPages = []
+	for page in existingPages:
+		resp = s.get(baseURL + page)
+		zzoup = BeautifulSoup(resp.content, "html.parser")
+		for form in zzoup.find_all('input'):
+			if 'password' in str(form):
+				loginPages.append(page)
 
-	url = 'http://localhost:5000/login'
-	values = {'email': username, 'password': password}
+	print('login pages: ' + str(loginPages))
 
-	s.post(url, data=values)
+	for loginpage in loginPages:
+		url = baseURL+loginpage
+		values = {'Email': username, 'email': username, 'Username':username, 'username': username,
+		          'Password': password, 'password': password}
+		s.post(url, data=values)
+
 	alreadySpidered = []
-
 	spider()
 	print('Finished authenticated spider. Found pages: ' + str(existingPages))
+	#ProbeWebsite.probeTheWebsite(baseURL, existingPages, s)
 
 
+# Forced Browse
 # with open('./files-and-directories.txt') as browselist:
 # 	for newline in browselist:
 # 		line = newline.rstrip('\n')
