@@ -86,8 +86,8 @@ def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', 
 					currentPageExploits.update(examineForVulnerabilities(html, targetURL, textArea, session))
 
 	vulnerabilities[targetURL] = currentPageExploits
+	print(str(vulnerabilityCounter) + " vulnerabilities found!\n")
 					# for each kind of XSS, check for XSS, store in file buffer, print to screen, and if vulnerable, add to vulnerabilities
 
 					# for each kind of SQL, check for SQL, store in file buffer, print to screen, and if vulnerable, add to vulnerabilities
 
-print(str(vulnerabilityCounter) + " vulnerabilities found!\n")
