@@ -96,7 +96,7 @@ spider()
 
 if not automate_login:
 	print('Finished unauthenticated spider. Found pages: ' + str(existingPages))
-	#ProbeWebsite.probeTheWebsite(baseURL, existingPages, None)
+	ProbeWebsite.probeTheWebsite(baseURL, existingPages, None)
 
 
 if automate_login:
@@ -167,7 +167,7 @@ if automate_login:
 			s.post(url, data=values)
 
 	print('Finished authenticated spider. Found pages: ' + str(existingPages))
-	#ProbeWebsite.probeTheWebsite(baseURL, existingPages, s)
+	ProbeWebsite.probeTheWebsite(baseURL, existingPages, s)
 
 
 # Forced Browse
