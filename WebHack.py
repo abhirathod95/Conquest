@@ -109,8 +109,8 @@ if automate_login:
 	alreadySpidered = []
 	spider()
 	print('Finished authenticated spider. Found pages: ' + str(existingPages))
-	ProbeWebsite.probeTheWebsite(baseURL, existingPages, s)
-
+	# ProbeWebsite.probeTheWebsite(baseURL, existingPages, s)
+	ProbeWebsite.probeTheWebsite(baseURL, None, s)
 
 # Forced Browse
 # with open('./files-and-directories.txt') as browselist:
