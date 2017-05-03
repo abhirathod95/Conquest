@@ -5,12 +5,13 @@ import argparse
 from bs4 import BeautifulSoup, SoupStrainer
 
 import requests
-#import ProbeWebsite
+import ProbeWebsite
 
 existingPages = []
 alreadySpidered = []
 
 s = requests.session()
+
 
 # Spider method works for our demo website with just 5 lines or so
 # but needs loads more code for compatibility with other websites.
@@ -84,21 +85,26 @@ if not automate_login:
 
 if automate_login:
 	# Do authentication if credentials provided.
-	loginPages = []
 	for page in existingPages:
+		formpassword = ''
+		formusername = ''
 		resp = s.get(baseURL + page)
 		zzoup = BeautifulSoup(resp.content, "html.parser")
 		for form in zzoup.find_all('input'):
-			if 'password' in str(form):
-				loginPages.append(page)
+			if ('Passw' in str(form)) or ('passw' in str(form)):
+				formpassword = form['name']
+				print('Found password field in page: ' + page)
+				print('Form password: ' + form['name'])
 
-	print('login pages: ' + str(loginPages))
+			if ('user' in str(form)) or ('email' in str(form)):
+				formusername = form['name']
+				print('Found username field in page: ' + page)
+				print('Form username: ' + form['name'])
 
-	for loginpage in loginPages:
-		url = baseURL+loginpage
-		values = {'Email': username, 'email': username, 'Username':username, 'username': username,
-		          'Password': password, 'password': password}
-		s.post(url, data=values)
+
+			url = baseURL + page
+			values = {formpassword: password, formusername: username}
+			s.post(url, data=values)
 
 	alreadySpidered = []
 	spider()
