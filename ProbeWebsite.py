@@ -1,21 +1,33 @@
 import requests
+import random
 from bs4 import BeautifulSoup
 
 vulnerabilities = {}
 vulnerabilityCounter = 0
+storedSession = None
 
 def examineJavascriptForXSS(html, targetURL, inputField, session):
 	return False  # temp value until function is actually implemented
 
+def locateScriptTagsWithString(html, stringToFind) :
+	kindsOfTags = ["li", "text", "td", "tr", "p"]
+	for tag in kindsOfTags :
+		elements = html.find_all(tag)
+	return False
 
 def probeFoundXSSVulnerability(html, targetURL, inputField, session):
-    probeText = "<script></script>"
-    data = {"body" : probeText, "placeholder" : probeText, "text" : probeText}
-    try :
-        session.post(targetURL, data)
-    except :
-        print("Unable to access webpage.")
-    return
+	randomNumber = random.randint(5599993912, 2459510340230403407)
+	probeText = "I really really x" + str(randomNumber) + " times like this<script></script>"
+	data = {"body" : probeText, "placeholder" : probeText, "text" : probeText}
+	try :
+		session.post(targetURL, data)
+		html = session.get(targetURL)
+		html = BeautifulSoup(html.text, "html.parser")
+		if(locateScriptTagsWithString(html, "I really really x" + str(randomNumber) + " times like this")) :
+			return inputField
+	except :
+		print("Unable to access webpage.")
+	return
 
 
 
@@ -45,18 +57,24 @@ def examineForVulnerabilities(html, targetURL, element, session):
 
 	return pageExploits
 
+def storeSession(session) :
+	global storedSession
+	storedSession = session
+
 def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', '/register', '/movies', '/forum'], authenticatedSession=None):
 	global vulnerabilities
 	session = None
+	if (not targetPage) :
+		print("No target URL extensions specified, defaulting to base list. Not likely to find much!!!!\n\n")
+		targetPage = ['/', '/login', '/register', '/movies', '/forum']
+
 	if (authenticatedSession):
 		session = authenticatedSession
 		print("Passed an authenticated session! Trying all pages.\n")
 	else:
 		session = requests.Session()
 		print("Passed in an unauthenticated session. Trying all pages that don't require authentication. Results may be LIMITED.\n")
-	if (targetPage == ['', 'login', 'register', 'movies', 'forum']):
-		print("No target URL extensions specified, defaulting to base list. Not likely to find much!!!!\n\n")
-	for restOfURL in targetPage:
+	for restOfURL in targetPage :
 		targetURL = baseURL + restOfURL
 		currentPageExploits = {}
 		try :
@@ -67,6 +85,7 @@ def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', 
 				# data = urllib.urlencode({"email" : authorization[0], "password" : authorization[1]})
 				# urllib.urlopen(baseURL + "/login", data)
 				try :
+					# session = some kind of authorized session
 					html = session.get(targetURL)
 				except :
 					print("Credentials were not valid, or another problem happened after attempting to authenticate for URL: " + targetURL)
