@@ -1,14 +1,15 @@
 import sys 
+from vuln_page import VulnPage
 
 #this will be a method and login will be a parameter that's the url 
 
-def getInput(login,vulnerabilities,session):
+def getInput(login, vulnerabilities, session=None):
 	exploits = ["SQL Injection","Cross Site Scripting","Something else"]
 	payloads = [["Query 1","Query 2","Query 3"],["Steal user credentials using fake login page","b","c"],["1","2","3"]]
 	print("Please select the pages you would like to exploit:")
-	print("{:<30} {:<30}".format("Pages", "Vulnerabilities"))
+	print("{:<20} {:<30}".format("Pages", "Vulnerabilities"))
 	for page in vulnerabilities:
-		print("{:<30} {:<30}".format(page[0], ",".join(page[1])))
+		print("{:<30} {:<30}".format(page.name, page.pprint_vuln()))
 	print("Type the number next to the type of exploit you want")
 
 	count = 1
@@ -33,7 +34,11 @@ def getInput(login,vulnerabilities,session):
 	"""
 
 if __name__ == "__main__":
-	getInput(None, [("/login", [])])
+	def_list = [VulnPage("login", "/login", ["SQL"], {"username": "", "password": ""}),
+				VulnPage("movies", "/movies", ["SQL"], None),
+				VulnPage("forum", "/forum", ["XSS"], {"body":""})]
+	print(def_list)
+	getInput(None, def_list)
 
 
 """
