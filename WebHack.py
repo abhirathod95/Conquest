@@ -150,11 +150,6 @@ if automate_login:
 			htmll2 = s.get('http://localhost:5000/forum')
 			print('inside second loop: '+str(htmll2))
 
-
-	sess = s.get('http://localhost:5000/forum')
-	print('After loop first time AFTER SPIDER: ' + str(sess))
-	print('Finished authenticated spider. Found pages: ' + str(existingPages))
-
 	ProbeWebsite.probeTheWebsite(baseURL, existingPages, s)
 
 
