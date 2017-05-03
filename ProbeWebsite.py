@@ -63,7 +63,7 @@ def examineForVulnerabilities(html, targetURL, element, session):
 		if (isVulnerable):
 			pageExploits["XSS" + str(vulnerabilityCounter)] = str(element)
 			vulnerabilityCounter += 1
-			print("XSS VULERABILITY FOUND: " + str(element) + " on page " + targetURL + ". Found using probe-text: " + isVulnerable + "\n")
+			print("XSS VULERABILITY FOUND: \" " + str(element) + " \" on page " + targetURL + ". Found using probe-text: \" " + isVulnerable + " \"\n")
 		else:
 			print("No XSS vulnerabilities immediately found for " + str(element) + " on page " + targetURL + "\nEither element is not vulnerable, or website is good about not leaking information.\n")
 
@@ -114,5 +114,11 @@ def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', 
 					currentPageExploits.update(examineForVulnerabilities(html, targetURL, textArea, session))
 
 	vulnerabilities[targetURL] = currentPageExploits
-	print(str(vulnerabilityCounter) + " vulnerabilities found!\n")
+	if(vulnerabilityCounter == 0):
+		print("No vulnerabilities found.\n")
+	else :
+		if(vulnerabilityCounter == 1):
+			print("1 vulnerability found!\n")
+		else :
+			print(str(vulnerabilityCounter) + " vulnerabilities found!\n")
 
