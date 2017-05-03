@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 vulnerabilities = {}
 vulnerabilityCounter = 0
 loginPage = []
+SQLiTexts = ["Wayne\'s World", 'Wayne\"s World', "\' OR 1=1;--", "\" OR 1=1;--"]
 
 def examineJavascriptForXSS(html, targetURL, inputField, session):
 	return False  # temp value until function is actually implemented
@@ -42,42 +43,52 @@ def probeFoundXSSVulnerability(html, targetURL, inputField, session) :
 	except :
 		return
 
-def checkIfSQLi(html) :
+def checkIfSQLi(html, forcedLogin=False) :
 	htmlPage = html.prettify()
 	error = "error" in htmlPage or "ERROR" in htmlPage or "Error" in htmlPage or "err" in htmlPage or "ERR" in htmlPage or "Err" in htmlPage
-	sql = "sql" in htmlPage or "SQL" in htmlPage or "Sql" in htmlPage
+	sql = "sql " in htmlPage or " SQL" in htmlPage or "Sql " in htmlPage
 	grammar = "syntax" in htmlPage or "Syntax" in htmlPage or "SYNTAX" in htmlPage or "statement" in htmlPage or "Statement" in htmlPage or "STATEMENT" in htmlPage
 
 	if(error and sql and grammar) :				# checks for defacto SQLi information leak. If true, then there's a SQL vulnerability.
 		return True
 
+	if(forcedLogin) :
+		logOut = "log out" in htmlPage or "Log Out" in htmlPage or "LOG OUT" in htmlPage or "Log OUT" in htmlPage or "log OUT" in htmlPage
+		signOut = "sign out" in htmlPage or "Sign Out" in htmlPage or "SIGN OUT" in htmlPage or "Sign OUT" in htmlPage or "sign OUT" in htmlPage
+		if(logOut or signOut) :
+			return True
+		else :
+			successful = "success" in htmlPage or "SUCCESS" in htmlPage
+			registered = "registered" in htmlPage or "Registered" in htmlPage or "Registration" in htmlPage or "registration" in htmlPage
+			if(successful and registered) :
+				return True
 	return False
 
 def probeFoundSQLiVulnerability(html, targetURL, inputField, session) :
-	probeText1 = "Wayne's World"
-	data = {"username" : "'", "password" : "'", "name" : "'", "firstname" : "'", "first" : "'", "last" : "'", "fname" : "'", "lname" : "'"}
-
-	try :
-		probeText = probeText1
-		html = session.post(targetURL, data)
-		if("405" in html.text or "403" in html.text or "400" in html.text) :
-			raise Exception
-		html = BeautifulSoup(html.text, "html.parser")
-		vulnerable = checkIfSQLi(html)
-		if(vulnerable) :
-			return probeText
-	except :
+	for probeText in SQLiTexts :
 		try :
-			probeText = probeText1
-			name = inputField.attrs['name']
-			queryURL = targetURL + "?" + name + "=" + probeText
-			html = session.get(queryURL)
+			data = {"username": probeText, "email" : probeText, "email_address" : probeText, "emailAddress" : probeText, "password": probeText, "name": probeText, "firstname": probeText, "first": probeText, "last": probeText, "fname": "'", "lname": probeText}
+			html = session.post(targetURL, data)
+			if("405" in html.text or "403" in html.text or "400" in html.text) :
+				raise Exception
 			html = BeautifulSoup(html.text, "html.parser")
-			vulnerable = checkIfSQLi(html)
+			if(probeText == SQLiTexts[2] or probeText == SQLiTexts[3]) :
+				vulnerable = checkIfSQLi(html, True)
+			else :
+				vulnerable = checkIfSQLi(html)
 			if(vulnerable) :
 				return probeText
 		except :
-			return
+			try :
+				name = inputField.attrs['name']
+				queryURL = targetURL + "?" + name + "=" + probeText
+				html = session.get(queryURL)
+				html = BeautifulSoup(html.text, "html.parser")
+				vulnerable = checkIfSQLi(html)
+				if(vulnerable) :
+					return probeText
+			except :
+				return
 	return
 
 def examineForVulnerabilities(html, targetURL, element, session):
