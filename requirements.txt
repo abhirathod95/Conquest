@@ -1,5 +1,6 @@
 alembic==0.9.1
 appdirs==1.4.3
+BeautifulSoup==3.2.1
 beautifulsoup4==4.5.3
 click==6.7
 decorator==4.0.11
