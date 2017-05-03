@@ -18,9 +18,9 @@ s = requests.session()
 def spider():
 	while set(existingPages) != set(alreadySpidered):
 		for page in existingPages:
-			if page not in alreadySpidered:
+			if (page not in alreadySpidered):
 				resp = s.get(baseURL + page, allow_redirects=False).content
-				# print('spidering: '+page)
+				#print('spidering: '+page)
 				alreadySpidered.append(page)
 				for spiderLink in BeautifulSoup(resp, "html.parser", parse_only=SoupStrainer('a')):
 					if spiderLink.has_attr('href') and (spiderLink['href'] not in existingPages):
@@ -84,6 +84,7 @@ if not automate_login:
 
 
 if automate_login:
+	loginpages = []
 	# Do authentication if credentials provided.
 	for page in existingPages:
 		formpassword = ''
@@ -107,6 +108,7 @@ if automate_login:
 				founduser = True
 
 		if (founduser is True) and (foundpassword is True):
+			loginpages.append(page)
 
 			url = baseURL + page
 			values = {formpassword: password, formusername: username}
@@ -115,17 +117,42 @@ if automate_login:
 			htmll = s.get('http://localhost:5000/forum')
 			print(htmll)
 
-	htmll2 = s.get('http://localhost:5000/forum')
-	print('After loop first time: ' + str(htmll2))
-
-	ProbeWebsite.storeSession(s)
-
 	alreadySpidered = []
 	spider()
 
+	for page2 in loginpages:
+		formpassword2 = ''
+		formusername2 = ''
+		founduser2 = False
+		foundpassword2 = False
 
-	htmll22 = s.get('http://localhost:5000/forum')
-	print('After loop first time AFTER SPIDER: ' + str(htmll22))
+		resp = s.get(baseURL + page2)
+		zzoup = BeautifulSoup(resp.content, "html.parser")
+		for form in zzoup.find_all('input'):
+			if ('Passw' in str(form)) or ('passw' in str(form)):
+				formpassword2 = form['name']
+				print('Found password field in page: ' + page2)
+				print('Form password: ' + form['name'])
+				foundpassword2 = True
+
+			if ('user' in str(form)) or ('email' in str(form)):
+				formusername2 = form['name']
+				print('Found username field in page: ' + page2)
+				print('Form username: ' + form['name'])
+				founduser2 = True
+
+		if (founduser2 is True) and (foundpassword2 is True):
+
+			url = baseURL + page2
+			values = {formpassword2: password, formusername2: username}
+			s.post(url, data=values)
+
+			htmll2 = s.get('http://localhost:5000/forum')
+			print('inside second loop: '+str(htmll2))
+
+
+	sess = s.get('http://localhost:5000/forum')
+	print('After loop first time AFTER SPIDER: ' + str(sess))
 	print('Finished authenticated spider. Found pages: ' + str(existingPages))
 
 	ProbeWebsite.probeTheWebsite(baseURL, existingPages, s)
