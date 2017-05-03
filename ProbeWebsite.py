@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 
 vulnerabilities = {}
 vulnerabilityCounter = 0
-storedSession = None
 
 def examineJavascriptForXSS(html, targetURL, inputField, session):
 	return False  # temp value until function is actually implemented
@@ -13,6 +12,14 @@ def locateScriptTagsWithString(html, stringToFind) :
 	kindsOfTags = ["li", "text", "td", "tr", "p"]
 	for tag in kindsOfTags :
 		elements = html.find_all(tag)
+		if stringToFind not in elements :
+			continue
+		theCorrectElement = elements[0]
+		for element in elements :
+			if(stringToFind in element) :
+				theCorrectElement = element
+				# find out if this element has script tags associated with it
+
 	return False
 
 def probeFoundXSSVulnerability(html, targetURL, inputField, session):
@@ -57,9 +64,6 @@ def examineForVulnerabilities(html, targetURL, element, session):
 
 	return pageExploits
 
-def storeSession(session) :
-	global storedSession
-	storedSession = session
 
 def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', '/register', '/movies', '/forum'], authenticatedSession=None):
 	global vulnerabilities
