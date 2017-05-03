@@ -11,7 +11,7 @@ existingPages = []
 alreadySpidered = []
 
 s = requests.session()
-
+#ses = requests.session()
 
 # Spider method works for our demo website with just 5 lines or so
 # but needs loads more code for compatibility with other websites.
@@ -88,6 +88,9 @@ if automate_login:
 	for page in existingPages:
 		formpassword = ''
 		formusername = ''
+		founduser = False
+		foundpassword = False
+
 		resp = s.get(baseURL + page)
 		zzoup = BeautifulSoup(resp.content, "html.parser")
 		for form in zzoup.find_all('input'):
@@ -95,20 +98,34 @@ if automate_login:
 				formpassword = form['name']
 				print('Found password field in page: ' + page)
 				print('Form password: ' + form['name'])
+				foundpassword = True
 
 			if ('user' in str(form)) or ('email' in str(form)):
 				formusername = form['name']
 				print('Found username field in page: ' + page)
 				print('Form username: ' + form['name'])
+				founduser = True
 
+		if (founduser is True) and (foundpassword is True):
 
 			url = baseURL + page
 			values = {formpassword: password, formusername: username}
 			s.post(url, data=values)
 
+			htmll = s.get('http://localhost:5000/forum')
+			print(htmll)
+
+	htmll2 = s.get('http://localhost:5000/forum')
+	print('After loop first time: ' + str(htmll2))
+
 	alreadySpidered = []
 	spider()
+
+
+	htmll22 = s.get('http://localhost:5000/forum')
+	print('After loop first time AFTER SPIDER: ' + str(htmll22))
 	print('Finished authenticated spider. Found pages: ' + str(existingPages))
+
 	ProbeWebsite.probeTheWebsite(baseURL, existingPages, s)
 
 
