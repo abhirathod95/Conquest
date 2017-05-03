@@ -118,6 +118,8 @@ if automate_login:
 	htmll2 = s.get('http://localhost:5000/forum')
 	print('After loop first time: ' + str(htmll2))
 
+	ProbeWebsite.storeSession(s)
+
 	alreadySpidered = []
 	spider()
 
