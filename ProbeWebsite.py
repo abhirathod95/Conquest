@@ -9,32 +9,37 @@ def examineJavascriptForXSS(html, targetURL, inputField, session):
 	return False  # temp value until function is actually implemented
 
 def locateScriptTagsWithString(html, stringToFind) :
+	filtered = (stringToFind not in html.text) or ((stringToFind + "<script></script>") in html.text)
+	if(filtered):
+		return
 	kindsOfTags = ["li", "text", "td", "tr", "p"]
 	for tag in kindsOfTags :
 		elements = html.find_all(tag)
-		if stringToFind not in elements :
+		if stringToFind not in str(elements) :
 			continue
 		theCorrectElement = elements[0]
 		for element in elements :
-			if(stringToFind in element) :
+			if(stringToFind in str(element)) :
 				theCorrectElement = element
+				if(stringToFind + "<script></script>" in str(element.contents)) :
+					return (stringToFind + "<script></script>")
 				# find out if this element has script tags associated with it
-
-	return False
+	return
 
 def probeFoundXSSVulnerability(html, targetURL, inputField, session):
 	randomNumber = random.randint(5599993912, 2459510340230403407)
-	probeText = "I really really x" + str(randomNumber) + " times like this<script></script>"
+	baseString ="I really really x" + str(randomNumber) + " times like this"
+	probeText = baseString + "<script></script>"
 	data = {"body" : probeText, "placeholder" : probeText, "text" : probeText}
 	try :
 		session.post(targetURL, data)
 		html = session.get(targetURL)
 		html = BeautifulSoup(html.text, "html.parser")
-		if(locateScriptTagsWithString(html, "I really really x" + str(randomNumber) + " times like this")) :
-			return inputField
+		successfulText = locateScriptTagsWithString(html, baseString)
+		if(successfulText) :
+			return successfulText
 	except :
-		print("Unable to access webpage.")
-	return
+		return
 
 
 
