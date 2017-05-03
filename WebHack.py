@@ -80,7 +80,7 @@ for link in BeautifulSoup(response, "html.parser", parse_only=SoupStrainer('a'))
 spider()
 if not automate_login:
 	print('Finished unauthenticated spider. Found pages: ' + str(existingPages))
-	#ProbeWebsite.probeTheWebsite(baseURL, existingPages, None)
+	ProbeWebsite.probeTheWebsite(baseURL, existingPages, None)
 
 
 if automate_login:
@@ -109,7 +109,7 @@ if automate_login:
 	alreadySpidered = []
 	spider()
 	print('Finished authenticated spider. Found pages: ' + str(existingPages))
-	#ProbeWebsite.probeTheWebsite(baseURL, existingPages, s)
+	ProbeWebsite.probeTheWebsite(baseURL, existingPages, s)
 
 
 # Forced Browse
