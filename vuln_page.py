@@ -7,7 +7,6 @@ class VulnPage:
 		self.name = name
 		self.url = url
 		self.vuln = vuln
-		# THIS IS FOR POST REQUEST VULNERABILITIES
 		self.data = data
 		# 0 FOR GET REQUEST (so data is parameters)
 		# 1 FOR POST REQUEST (so data is json)

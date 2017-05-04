@@ -14,10 +14,11 @@ def examineJavascriptForXSS(html, targetURL, inputField, session):
 def cleanVulnerabilities() :
 	global vulnerabilities
 	tempVulnerabilities = {}
-
-	for vulnerability in vulnerabilities :
-		string = vulnerability.name
+	v = vulnerabilities.copy()
+	for vulnerability in v :
+		string = vulnerability.vuln
 		string += vulnerability.url
+		string += str(vulnerability.req_type)
 		try :
 			if tempVulnerabilities[string]:
 				vulnerabilities.remove(vulnerability)
@@ -25,6 +26,7 @@ def cleanVulnerabilities() :
 				tempVulnerabilities[string] = 1
 		except :
 				tempVulnerabilities[string] = 1
+
 def locateScriptTagsWithString(html, stringToFind) :
 	filtered = (stringToFind not in html.text) or ((stringToFind + "<script></script>") in html.text)
 	if(filtered):
@@ -54,7 +56,10 @@ def probeFoundXSSVulnerability(html, targetURL, inputField, session) :
 		html = BeautifulSoup(html.text, "html.parser")
 		successfulText = locateScriptTagsWithString(html, baseString)
 		if(successfulText) :
-			vuln = vuln_page.VulnPage("XSS", targetURL, "XSS", data)
+			nameOfPage = targetURL.split("/")
+			length = len(nameOfPage)
+			nameOfPage = nameOfPage[length-1]
+			vuln = vuln_page.VulnPage(nameOfPage, targetURL, "XSS", data, 1)
 			vulnerabilities.append(vuln)
 			return successfulText
 	except :
@@ -94,7 +99,10 @@ def probeFoundSQLiVulnerability(html, targetURL, inputField, session) :
 			else :
 				vulnerable = checkIfSQLi(html)
 			if(vulnerable) :
-				vuln = vuln_page.VulnPage("SQL Post", targetURL, "SQL", data)
+				nameOfPage = targetURL.split("/")
+				length = len(nameOfPage)
+				nameOfPage = nameOfPage[length - 1]
+				vuln = vuln_page.VulnPage(nameOfPage, targetURL, "SQL", data, 1)
 				vulnerabilities.append(vuln)
 				return probeText
 		except :
@@ -105,7 +113,10 @@ def probeFoundSQLiVulnerability(html, targetURL, inputField, session) :
 				html = BeautifulSoup(html.text, "html.parser")
 				vulnerable = checkIfSQLi(html)
 				if(vulnerable) :
-					vuln = vuln_page.VulnPage("SQL Get", targetURL, "SQL", None)
+					nameOfPage = targetURL.split("/")
+					length = len(nameOfPage)
+					nameOfPage = nameOfPage[length - 1]
+					vuln = vuln_page.VulnPage(nameOfPage, targetURL, "SQL", {"name" : name}, 0)
 					vulnerabilities.append(vuln)
 					return probeText
 			except :
@@ -187,6 +198,7 @@ def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', 
 					examineForVulnerabilities(html, targetURL, textArea, session)
 
 	cleanVulnerabilities()
+	vulnerabilityCounter = len(vulnerabilities)
 	if(vulnerabilityCounter == 0):
 		print("No vulnerabilities found.\n")
 	else :
