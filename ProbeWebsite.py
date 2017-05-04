@@ -59,7 +59,7 @@ def probeFoundXSSVulnerability(html, targetURL, inputField, session) :
 			nameOfPage = targetURL.split("/")
 			length = len(nameOfPage)
 			nameOfPage = nameOfPage[length-1]
-			vuln = vuln_page.VulnPage(nameOfPage, targetURL, "XSS", data, 1)
+			vuln = vuln_page.VulnPage(nameOfPage, targetURL, "XSS", data, 1, 0)
 			vulnerabilities.append(vuln)
 			return successfulText
 	except :
@@ -91,7 +91,7 @@ def probeFoundSQLiVulnerability(html, targetURL, inputField, session) :
 		try :
 			data = {"username": probeText, "email" : probeText, "email_address" : probeText, "emailAddress" : probeText, "password": probeText, "name": probeText, "firstname": probeText, "first": probeText, "last": probeText, "fname": "'", "lname": probeText}
 			html = session.post(targetURL, data)
-			if("405" in html.text or "403" in html.text or "400" in html.text) :
+			if(html.status_code == 400 or html.status_code == 404 or html.status_code == 403 or html.status_code == 405) :
 				raise Exception
 			html = BeautifulSoup(html.text, "html.parser")
 			if(probeText == SQLiTexts[2] or probeText == SQLiTexts[3]) :
@@ -102,7 +102,11 @@ def probeFoundSQLiVulnerability(html, targetURL, inputField, session) :
 				nameOfPage = targetURL.split("/")
 				length = len(nameOfPage)
 				nameOfPage = nameOfPage[length - 1]
-				vuln = vuln_page.VulnPage(nameOfPage, targetURL, "SQL", data, 1)
+				if("\'" in probeText) :
+					symbol = 0
+				else :
+					symbol = 1
+				vuln = vuln_page.VulnPage(nameOfPage, targetURL, "SQL", data, 1, symbol)
 				vulnerabilities.append(vuln)
 				return probeText
 		except :
@@ -116,7 +120,11 @@ def probeFoundSQLiVulnerability(html, targetURL, inputField, session) :
 					nameOfPage = targetURL.split("/")
 					length = len(nameOfPage)
 					nameOfPage = nameOfPage[length - 1]
-					vuln = vuln_page.VulnPage(nameOfPage, targetURL, "SQL", {"name" : name}, 0)
+					if("\'" in probeText):
+						symbol = 0
+					else:
+						symbol = 1
+					vuln = vuln_page.VulnPage(nameOfPage, targetURL, "SQL", {"name" : name}, 0, symbol)
 					vulnerabilities.append(vuln)
 					return probeText
 			except :
@@ -184,10 +192,10 @@ def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', 
 					print("Credentials were not valid, or another problem happened after attempting to authenticate for URL: " + targetURL)
 					continue
 		if (html):
-			html = BeautifulSoup(html.content, "html.parser")
-			if "404" in html.text:
+			if html.status_code == 404:
 				print("Request for " + targetURL + " returned 404 error\n")
 				continue
+			html = BeautifulSoup(html.content, "html.parser")
 			formFields = html.find_all('form')
 			for form in formFields :
 				inputFields = form.find_all('input')
