@@ -18,6 +18,7 @@ def fake_login():
 		hstring = str(r.text)
 		name = "fake.html"
 		file_name = os.path.join("app", "templates", name)
+		
 		with open(file_name, 'w') as out:
 			out.write(hstring)
 	

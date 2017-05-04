@@ -101,8 +101,8 @@ def hack(login, vulnerabilities, session=None):
 		else:
 			resp = controller.post(selected_page.url, data=data)
 
-		with open("test_" + str(choice) + ".html", 'w') as out_file:
-			out_file.write(resp.text)
+		#with open("test_" + str(choice) + ".html", 'w') as out_file:
+		#	out_file.write(resp.text)
 
 		test = input("Continue to next page?")
 
