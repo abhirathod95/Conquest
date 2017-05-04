@@ -1,8 +1,9 @@
 import requests
 import random
+import vuln_page
 from bs4 import BeautifulSoup
 
-vulnerabilities = {}
+vulnerabilities = []
 vulnerabilityCounter = 0
 loginPage = []
 SQLiTexts = ["Wayne\'s World", 'Wayne\"s World', "\' OR 1=1;--", "\" OR 1=1;--"]
@@ -10,6 +11,20 @@ SQLiTexts = ["Wayne\'s World", 'Wayne\"s World', "\' OR 1=1;--", "\" OR 1=1;--"]
 def examineJavascriptForXSS(html, targetURL, inputField, session):
 	return False  # temp value until function is actually implemented
 
+def cleanVulnerabilities() :
+	global vulnerabilities
+	tempVulnerabilities = {}
+
+	for vulnerability in vulnerabilities :
+		string = vulnerability.name
+		string += vulnerability.url
+		try :
+			if tempVulnerabilities[string]:
+				vulnerabilities.remove(vulnerability)
+			else :
+				tempVulnerabilities[string] = 1
+		except :
+				tempVulnerabilities[string] = 1
 def locateScriptTagsWithString(html, stringToFind) :
 	filtered = (stringToFind not in html.text) or ((stringToFind + "<script></script>") in html.text)
 	if(filtered):
@@ -39,6 +54,8 @@ def probeFoundXSSVulnerability(html, targetURL, inputField, session) :
 		html = BeautifulSoup(html.text, "html.parser")
 		successfulText = locateScriptTagsWithString(html, baseString)
 		if(successfulText) :
+			vuln = vuln_page.VulnPage("XSS", targetURL, "XSS", data)
+			vulnerabilities.append(vuln)
 			return successfulText
 	except :
 		return
@@ -77,6 +94,8 @@ def probeFoundSQLiVulnerability(html, targetURL, inputField, session) :
 			else :
 				vulnerable = checkIfSQLi(html)
 			if(vulnerable) :
+				vuln = vuln_page.VulnPage("SQL Post", targetURL, "SQL", data)
+				vulnerabilities.append(vuln)
 				return probeText
 		except :
 			try :
@@ -86,6 +105,8 @@ def probeFoundSQLiVulnerability(html, targetURL, inputField, session) :
 				html = BeautifulSoup(html.text, "html.parser")
 				vulnerable = checkIfSQLi(html)
 				if(vulnerable) :
+					vuln = vuln_page.VulnPage("SQL Get", targetURL, "SQL", None)
+					vulnerabilities.append(vuln)
 					return probeText
 			except :
 				return
@@ -108,7 +129,6 @@ def examineForVulnerabilities(html, targetURL, element, session):
 		print("Probing with sample input to test for XSS vulnerabilities\n")
 		isVulnerable = probeFoundXSSVulnerability(html, targetURL, element, session)
 		if (isVulnerable) :
-			pageExploits["XSS" + str(vulnerabilityCounter)] = str(element)
 			vulnerabilityCounter += 1
 			print("XSS VULERABILITY FOUND: \" " + str(element) + " \" on page " + targetURL + " . Found using probe-text: \" " + isVulnerable + " \"\n")
 		else:
@@ -116,7 +136,6 @@ def examineForVulnerabilities(html, targetURL, element, session):
 			print("Probing with sample input to test for SQLi vulnerabilities\n")
 			isVulnerable = probeFoundSQLiVulnerability(html, targetURL, element,	session)
 			if(isVulnerable) :
-				pageExploits["SQLi" + str(vulnerabilityCounter)] = str(element)
 				vulnerabilityCounter += 1
 				print("SQLi VULNERABILITY FOUND: \" " + str(element) + "\" on page " + targetURL + " . Found using probe-text: \" " + isVulnerable + " \"\n")
 
@@ -140,7 +159,6 @@ def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', 
 		targetURL = baseURL + restOfURL
 		if("login" in restOfURL) :
 			loginPage.append(targetURL)
-		currentPageExploits = {}
 		try :
 			html = session.get(targetURL)
 		except :									# if html gets a 401 unauthorized error
@@ -164,11 +182,11 @@ def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', 
 				inputFields = form.find_all('input')
 				textAreas = form.find_all('textarea')
 				for inputField in inputFields:
-					currentPageExploits.update(examineForVulnerabilities(html, targetURL, inputField, session))
+					examineForVulnerabilities(html, targetURL, inputField, session)
 				for textArea in textAreas:
-					currentPageExploits.update(examineForVulnerabilities(html, targetURL, textArea, session))
+					examineForVulnerabilities(html, targetURL, textArea, session)
 
-	vulnerabilities[targetURL] = currentPageExploits
+	cleanVulnerabilities()
 	if(vulnerabilityCounter == 0):
 		print("No vulnerabilities found.\n")
 	else :
