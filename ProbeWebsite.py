@@ -193,5 +193,5 @@ def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', 
 		if(vulnerabilityCounter == 1):
 			print("1 vulnerability found!\n")
 		else :
-			print(str(vulnerabilityCounter) + " vulnerabilities found!\n")
+			print(str(len(vulnerabilities)) + " vulnerabilities found!\n")
 	#
