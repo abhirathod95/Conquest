@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 
 vulnerabilities = []
 vulnerabilityCounter = 0
-loginPage = []
+loginPage = None
 SQLiTexts = ["Wayne\'s World", 'Wayne\"s World', "\' OR 1=1;--", "\" OR 1=1;--"]
 
 def examineJavascriptForXSS(html, targetURL, inputField, session):
@@ -176,8 +176,8 @@ def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', 
 		print("Passed in an unauthenticated session. Trying all pages that don't require authentication. Results may be LIMITED.\n")
 	for restOfURL in targetPage :
 		targetURL = baseURL + restOfURL
-		if("login" in restOfURL) :
-			loginPage.append(targetURL)
+		if("login" in restOfURL and not loginPage) :
+			loginPage = session.get(targetURL)
 		try :
 			html = session.get(targetURL)
 		except :									# if html gets a 401 unauthorized error
