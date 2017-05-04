@@ -147,7 +147,7 @@ if automate_login:
 			loginpages.append(page)
 
 			url = baseURL + page
-			values = {formpassword: password, formusername: username, 'security_level': 0, 'form': 'submit'}
+			values = {formpassword: password, formusername: username, 'form': 'submit'}
 			temp=s.post(url, data=values)
 
 			print('POSTING: url = '+url)
