@@ -12,14 +12,15 @@ alreadySpidered = []
 
 s = requests.session()
 
+
 def spider():
-	print('begin spider. ' + str(existingPages))
+	print('Spider begin.')
 	while set(existingPages) != set(alreadySpidered):
 		for page in existingPages:
-			print('spidering page: '+page)
+			# print('spidering page: '+page)
 			if page not in alreadySpidered:
 				resp = s.get(baseURL + page, allow_redirects=False).content
-				print('spidering: '+page)
+				# print('spidering: '+page)
 				alreadySpidered.append(page)
 				for spiderLink in BeautifulSoup(resp, "html.parser", parse_only=SoupStrainer('a')):
 					if spiderLink.has_attr('href') and (spiderLink['href'] not in existingPages) and ('/' + spiderLink['href'] not in existingPages):
@@ -27,13 +28,34 @@ def spider():
 						if ('http' in spiderLink) or ('www' in spiderLink):
 							if urlnohttp in spiderLink:
 								existingPages.append(spiderLink.split(urlnohttp, 1)[1])
-								print('spider appended: ' + spiderLink.split(urlnohttp, 1)[1])
+								# print('spider appended: ' + spiderLink.split(urlnohttp, 1)[1])
 						elif '/' in spiderLink:
-							print('spider appended elif: ' + spiderLink)
+							# print('spider appended elif: ' + spiderLink)
 							existingPages.append(spiderLink)
 						else:
-							print('spider appended else: ' + spiderLink)
+							# print('spider appended else: ' + spiderLink)
 							existingPages.append('/' + spiderLink)
+	print('Spider finished.')
+
+
+def forced_browse(ses):
+	print('Forced browse begin.')
+	if ses is None:
+		ses = requests.session()
+
+	with open('./files-and-directories.txt') as browselist:
+		for newline in browselist:
+			line = newline.rstrip('\n')
+			# Try a HEAD request to the server with directory from the list.
+			forced = ses.head(baseURL + '/' + line)
+			# If the returned status code is not in the 400s or 500s, page exists.
+			if forced.status_code < 400:
+				# print('forced browse found: ' + line)
+				if '/'+line not in existingPages:
+					# print('forced browse appended: ' + line)
+					existingPages.append('/'+line)
+	print('Finished reconnaissance. Existing pages: '+str(existingPages))
+
 
 # Target domain entered as command line argument. Set up authenticate flags.
 baseURL = sys.argv[len(sys.argv) - 1]
@@ -51,13 +73,11 @@ automate_login = False
 rrr = requests.get(baseURL, allow_redirects=True)
 response = rrr.content
 
+# In case of redirect, get page(s)
 if len(rrr.history) >= 2:
 
-
 	existingPages.append(((rrr.history[len(rrr.history)-1]).url).split(baseURL, 1)[1])
-
 	print('appending 2: '+str((rrr.history[len(rrr.history)-1]).url.split(baseURL, 1)[1]))
-
 	print('append: '+rrr.url.split(baseURL, 1)[1])
 	existingPages.append(rrr.url.split(baseURL, 1)[1])
 
@@ -83,27 +103,26 @@ for link in BeautifulSoup(response, "html.parser", parse_only=SoupStrainer('a'))
 			#print('initial appended link: '+link)
 			if urlnohttp in link:
 				existingPages.append(link.split(urlnohttp, 1)[1])
-				print('appended: ' + link.split(urlnohttp, 1)[1])
+				# print('appended: ' + link.split(urlnohttp, 1)[1])
 		# For hrefs that are just the directory.
 		elif '/' in link:
-			print('initial appended elif: ' + link)
+			# print('initial appended elif: ' + link)
 			existingPages.append(link)
 		else:
-			print('initial appended else: ' + link)
+			# print('initial appended else: ' + link)
 			existingPages.append('/' + link)
-
 spider()
 
 if not automate_login:
-	print('Finished unauthenticated spider. Found pages: ' + str(existingPages))
-	ProbeWebsite.probeTheWebsite(baseURL, existingPages, None)
+	# print('Finished unauthenticated spider. Found pages: ' + str(existingPages))
+	forced_browse(None)
+	#ProbeWebsite.probeTheWebsite(baseURL, existingPages, None)
 
 
 if automate_login:
 	loginpages = []
 	# Do authentication if credentials provided.
 	for page in existingPages:
-		print('automating: '+page)
 		formpassword = ''
 		formusername = ''
 		founduser = False
@@ -134,7 +153,6 @@ if automate_login:
 			print('POSTING: url = '+url)
 			print('html user field: '+formusername+'    username: '+username)
 			print('html password field: '+formpassword+'    password: '+password)
-			#print(temp.content)
 
 	alreadySpidered = []
 	spider()
@@ -166,19 +184,11 @@ if automate_login:
 			values = {formpassword2: password, formusername2: username}
 			s.post(url, data=values)
 
-	print('Finished authenticated spider. Found pages: ' + str(existingPages))
-	ProbeWebsite.probeTheWebsite(baseURL, existingPages, s)
+	# print('Finished authenticated spider. Found pages: ' + str(existingPages))
+	forced_browse(s)
+	#ProbeWebsite.probeTheWebsite(baseURL, existingPages, s)
 
 
-# Forced Browse
-# with open('./files-and-directories.txt') as browselist:
-# 	for newline in browselist:
-# 		line = newline.rstrip('\n')
-# 		# Try a HEAD request to the server with directory from the list.
-# 		resp = h.request(baseURL+'/'+line, 'HEAD')
-# 		# If the returned status code is not in the 400s or 500s, page exists.
-# 		if int(resp[0]['status']) < 400:
-# 			existingPages.append(line)
-#
-# print(existingPages)
+
+
 
