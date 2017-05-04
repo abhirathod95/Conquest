@@ -187,6 +187,8 @@ if automate_login:
 	# print('Finished authenticated spider. Found pages: ' + str(existingPages))
 
 	forced_browse(s)
+
+	existingPages.remove('/logout.php')
 	ProbeWebsite.probeTheWebsite(baseURL, existingPages, s)
 
 
