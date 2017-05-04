@@ -39,7 +39,7 @@ def spider():
 
 
 def forced_browse(ses):
-	print('Forced browse begin.')
+	print('Forced browse begin. (This takes longer)')
 	if ses is None:
 		ses = requests.session()
 
@@ -116,7 +116,7 @@ spider()
 if not automate_login:
 	# print('Finished unauthenticated spider. Found pages: ' + str(existingPages))
 	forced_browse(None)
-	#ProbeWebsite.probeTheWebsite(baseURL, existingPages, None)
+	ProbeWebsite.probeTheWebsite(baseURL, existingPages, None)
 
 
 if automate_login:
@@ -186,7 +186,7 @@ if automate_login:
 
 	# print('Finished authenticated spider. Found pages: ' + str(existingPages))
 	forced_browse(s)
-	#ProbeWebsite.probeTheWebsite(baseURL, existingPages, s)
+	ProbeWebsite.probeTheWebsite(baseURL, existingPages, s)
 
 
 
