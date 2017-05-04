@@ -646,7 +646,6 @@ mod_feed
 menu.tpl
 media.js
 lt_LT
-logout.php
 interfaces
 info.php
 index3.php
