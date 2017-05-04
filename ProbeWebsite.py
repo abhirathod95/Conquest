@@ -49,7 +49,7 @@ def probeFoundXSSVulnerability(html, targetURL, inputField, session) :
 	randomNumber = random.randint(5599993912, 2459510340230403407)
 	baseString ="I really really x" + str(randomNumber) + " times like this"
 	probeText = baseString + "<script></script>"
-	data = {"body" : probeText, "placeholder" : probeText, "text" : probeText, "user" : probeText, "username" : probeText, "password": probeText, "pass" : probeText, "pw" : probeText}
+	data = {"body" : probeText, "placeholder" : probeText, "text" : probeText, "user" : probeText, "username" : probeText, "password": probeText, "pass" : probeText, "pw" : probeText, "entry" : probeText, "entry_add" : probeText, "blog" : probeText}
 	try :
 		session.post(targetURL, data)
 		html = session.get(targetURL)
@@ -214,4 +214,3 @@ def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', 
 			print("1 vulnerability found!\n")
 		else :
 			print(str(len(vulnerabilities)) + " vulnerabilities found!\n")
-	#
