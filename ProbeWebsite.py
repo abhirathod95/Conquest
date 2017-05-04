@@ -176,8 +176,8 @@ def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', 
 		print("Passed in an unauthenticated session. Trying all pages that don't require authentication. Results may be LIMITED.\n")
 	for restOfURL in targetPage :
 		targetURL = baseURL + restOfURL
-		if("login" in restOfURL and not loginPage) :
-			loginPage = session.get(targetURL)
+		if("login" in restOfURL) :
+			loginPage = targetURL
 		try :
 			html = session.get(targetURL)
 		except :									# if html gets a 401 unauthorized error
