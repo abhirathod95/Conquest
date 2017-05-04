@@ -147,7 +147,7 @@ if automate_login:
 			loginpages.append(page)
 
 			url = baseURL + page
-			values = {formpassword: password, formusername: username, 'form': 'submit'}
+			values = {formpassword: password, formusername: username, 'form': 'submit', 'security_level': 0}
 			temp=s.post(url, data=values)
 
 			print('POSTING: url = '+url)
@@ -181,10 +181,11 @@ if automate_login:
 		if (founduser2 is True) and (foundpassword2 is True):
 
 			url = baseURL + page2
-			values = {formpassword2: password, formusername2: username}
+			values = {formpassword2: password, formusername2: username, 'form': 'submit'}
 			s.post(url, data=values)
 
 	# print('Finished authenticated spider. Found pages: ' + str(existingPages))
+
 	forced_browse(s)
 	ProbeWebsite.probeTheWebsite(baseURL, existingPages, s)
 
