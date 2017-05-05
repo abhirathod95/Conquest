@@ -46,6 +46,7 @@ def forced_browse(ses):
 	with open('./files-and-directories.txt') as browselist:
 		for newline in browselist:
 			line = newline.rstrip('\n')
+			print('browsing: '+line)
 			# Try a HEAD request to the server with directory from the list.
 			forced = ses.head(baseURL + '/' + line)
 			# If the returned status code is not in the 400s or 500s, page exists.
