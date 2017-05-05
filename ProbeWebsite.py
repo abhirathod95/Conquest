@@ -134,7 +134,7 @@ def probeFoundSQLiVulnerability(html, targetURL, inputField, session) :
 						symbol = 0
 					else:
 						symbol = 1
-					vuln = vuln_page.VulnPage(nameOfPage, targetURL, ["SQL"], {"name" : name}, 0, symbol)
+					vuln = vuln_page.VulnPage(nameOfPage, targetURL, ["SQL"], {name : probeText}, 0, symbol)
 					vulnerabilities.append(vuln)
 					return probeText
 			except :
