@@ -22,19 +22,26 @@ def index():
 @app.route('/register' , methods=['GET','POST'])
 def register():
 	if request.method == 'POST':
-		user = User(request.form['first'], request.form['last'], request.form['email'], request.form['password'])
-		db.session.add(user)
-		db.session.commit()
+		try:
+			user = User(request.form['first'], request.form['last'], request.form['email'], request.form['password'])
+			db.session.add(user)
+			db.session.commit()
+		except Exception as e:
+			flash('Email is already in use! Please try a different email!')
+			return render_template('register.html')
 		flash('User successfully registered. Please sign in!')
 		return redirect(url_for('login'))
 	return render_template('register.html')
-	
  
 @app.route('/login', methods=['GET','POST'])
 def login():
 	if request.method == 'POST':
 		email = request.form['email']
 		password = request.form['password'] 
+		#if "'" in email or "'" in password:
+		#	flash('SQL statement Error!' , 'error')
+		#	return redirect(url_for('login'))
+
 		sql_query = "SELECT * FROM user where email='{}' AND password='{}'".format(email, password)
 		print(sql_query)
 		try:
@@ -43,7 +50,7 @@ def login():
 			result = None
 
 		if not result:
-			flash('Username or Password is invalid!' , 'error')
+			flash('Invalid Username/Password!' , 'error')
 			return redirect(url_for('login'))
 
 		registered_user = User(result[1], result[2], result[3], result[4])

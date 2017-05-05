@@ -6,6 +6,15 @@
             <div class="row">
                 <h2>Sign Up Now!</h2>
             </div>
+             {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class=flashes>
+                        {% for message in messages %}
+                            {{ message }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
             <div class="row">
                 <input type="text" id="first" name="first" placeholder="Enter First Name" required>
             </div>
