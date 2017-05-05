@@ -12,7 +12,7 @@ alreadySpidered = []
 
 s = requests.session()
 
-
+# Crawls HTML links recursively.
 def spider():
 	print('Spider begin.')
 	while set(existingPages) != set(alreadySpidered):
@@ -38,6 +38,7 @@ def spider():
 	print('Spider finished.')
 
 
+# Uses wordlist to access unreferenced pages on the web application.
 def forced_browse(ses):
 	print('Forced browse begin. (This takes longer)')
 	if ses is None:
@@ -116,12 +117,13 @@ for link in BeautifulSoup(response, "html.parser", parse_only=SoupStrainer('a'))
 			existingPages.append('/' + link)
 spider()
 
+# Finish recon here if no credentials passed.
 if not automate_login:
 	# print('Finished unauthenticated spider. Found pages: ' + str(existingPages))
 	forced_browse(None)
 	ProbeWebsite.probeTheWebsite(baseURL, existingPages, None)
 
-# Look for login pages, and any input fields that are for username and password
+# Look for login pages; find input fields that are for username and password.
 if automate_login:
 	loginpages = []
 	# Do authentication if credentials provided.
