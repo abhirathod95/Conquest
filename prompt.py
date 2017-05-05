@@ -40,7 +40,7 @@ def hack(login, vulnerabilities, session=None):
 	while answer != 'y' and answer != 'Y' and answer == 'N' and answer == 'n':
 		answer = input("Invalid input. Please enter either Y/n or N/n: ")
 	if answer == 'Y' or answer == 'y':
-		process = subprocess.Popen(['python', 'attacker_server.py'], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+		process = subprocess.Popen(['python', 'attacker_server.py'])
 	else:
 		process = None
 
@@ -119,7 +119,7 @@ def hack(login, vulnerabilities, session=None):
 	
 
 if __name__ == "__main__":
-	def_list = [VulnPage("login", "http://127.0.0.1:5000/login", ["SQL"], {"username": "", "password": ""}, POST_REQ, QUOTE),
+	def_list = [VulnPage("login", "http://127.0.0.1:5000/login", ["SQL",], {"username": "", "password": ""}, POST_REQ, QUOTE),
 				VulnPage("movies", "http://127.0.0.1:5000/movies", ["SQL"], {"search" : ""}, GET_REQ, APOSTROPHE),
 				VulnPage("forum", "http://127.0.0.1:5000/forum", ["XSS"], {"body":""}, POST_REQ, None)]
 
