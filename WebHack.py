@@ -191,6 +191,8 @@ if automate_login:
 	forced_browse(s)
 	if '/logout.php' in existingPages:
 		existingPages.remove('/logout.php')
+	if '/logout' in existingPages:
+		existingPages.remove('/logout')
 	ProbeWebsite.probeTheWebsite(baseURL, existingPages, s)
 
 
