@@ -77,6 +77,9 @@ def checkIfSQLi(html, forcedLogin=False) :
 	if(error and sql and grammar) :				# checks for defacto SQLi information leak. If true, then there's a SQL vulnerability.
 		return True
 
+	if("Error: HY000" in htmlPage) :
+		return True
+
 	if(forcedLogin) :
 		logOut = "log out" in htmlPage or "Log Out" in htmlPage or "LOG OUT" in htmlPage or "Log OUT" in htmlPage or "log OUT" in htmlPage
 		signOut = "sign out" in htmlPage or "Sign Out" in htmlPage or "SIGN OUT" in htmlPage or "Sign OUT" in htmlPage or "sign OUT" in htmlPage
