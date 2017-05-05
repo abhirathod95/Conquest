@@ -8,6 +8,7 @@ sqli_16.php
 sqli_7.php
 sqli_3.php
 sqli_1.php
+sqli_11.php
 tmpl
 lang
 default
