@@ -1,6 +1,7 @@
 import requests
 import random
 import vuln_page
+from prompt import hack
 from bs4 import BeautifulSoup
 
 vulnerabilities = []
@@ -214,3 +215,5 @@ def probeTheWebsite(baseURL="http://127.0.0.1:5000", targetPage=['/', '/login', 
 			print("1 vulnerability found!\n")
 		else :
 			print(str(len(vulnerabilities)) + " vulnerabilities found!\n")
+
+	hack(loginPage, vulnerabilities, session)
