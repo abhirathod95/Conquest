@@ -99,7 +99,9 @@ def probeFoundSQLiVulnerability(html, targetURL, inputField, session) :
 			html = session.post(targetURL, data)
 			if(html.status_code == 400 or html.status_code == 404 or html.status_code == 403 or html.status_code == 405) :
 				raise Exception
-			# html = BeautifulSoup(html.text, "html.parser")
+			html = BeautifulSoup(html.text, "html.parser")
+			if('register' in targetURL) :
+			 	return False
 			if(probeText == SQLiTexts[2] or probeText == SQLiTexts[3]) :
 				vulnerable = checkIfSQLi(html, True)
 			else :
