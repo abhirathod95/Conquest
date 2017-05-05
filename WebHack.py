@@ -76,6 +76,8 @@ response = rrr.content
 # In case of redirect, get page(s)
 if len(rrr.history) >= 2:
 
+	print('length!!! ' +str(len(rrr.history)))
+
 	existingPages.append(((rrr.history[len(rrr.history)-1]).url).split(baseURL, 1)[1])
 	print('appending 2: '+str((rrr.history[len(rrr.history)-1]).url.split(baseURL, 1)[1]))
 	print('append: '+rrr.url.split(baseURL, 1)[1])
@@ -187,8 +189,8 @@ if automate_login:
 	# print('Finished authenticated spider. Found pages: ' + str(existingPages))
 
 	forced_browse(s)
-
-	existingPages.remove('/logout.php')
+	if '/logout.php' in existingPages:
+		existingPages.remove('/logout.php')
 	ProbeWebsite.probeTheWebsite(baseURL, existingPages, s)
 
 
