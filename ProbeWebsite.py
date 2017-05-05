@@ -50,8 +50,10 @@ def probeFoundXSSVulnerability(html, targetURL, inputField, session) :
 	randomNumber = random.randint(5599993912, 2459510340230403407)
 	baseString ="I really really x" + str(randomNumber) + " times like this"
 	probeText = baseString + "<script></script>"
-	data = {"body" : probeText, "placeholder" : probeText, "text" : probeText, "user" : probeText, "username" : probeText, "password": probeText, "pass" : probeText, "pw" : probeText, "entry" : probeText, "entry_add" : probeText, "blog" : probeText}
+	data = {"body" : probeText, "placeholder" : probeText, "text" : probeText, "title" : probeText, "user" : probeText, "username" : probeText, "password": probeText, "pass" : probeText, "pw" : probeText, "entry" : probeText, "entry_add" : probeText, "blog" : "add", "action" : "search"}
 	try :
+		if("sqli" in targetURL) :
+			return
 		session.post(targetURL, data)
 		html = session.get(targetURL)
 		html = BeautifulSoup(html.text, "html.parser")
@@ -67,7 +69,7 @@ def probeFoundXSSVulnerability(html, targetURL, inputField, session) :
 		return
 
 def checkIfSQLi(html, forcedLogin=False) :
-	htmlPage = html.prettify()
+	htmlPage = html.text
 	error = "error" in htmlPage or "ERROR" in htmlPage or "Error" in htmlPage or "err" in htmlPage or "ERR" in htmlPage or "Err" in htmlPage
 	sql = "sql " in htmlPage or " SQL" in htmlPage or "Sql " in htmlPage
 	grammar = "syntax" in htmlPage or "Syntax" in htmlPage or "SYNTAX" in htmlPage or "statement" in htmlPage or "Statement" in htmlPage or "STATEMENT" in htmlPage
@@ -90,11 +92,11 @@ def checkIfSQLi(html, forcedLogin=False) :
 def probeFoundSQLiVulnerability(html, targetURL, inputField, session) :
 	for probeText in SQLiTexts :
 		try :
-			data = {"username": probeText, "email" : probeText, "email_address" : probeText, "emailAddress" : probeText, "password": probeText, "name": probeText, "firstname": probeText, "first": probeText, "last": probeText, "fname": "'", "lname": probeText}
+			data = {"username": probeText, "login" : probeText, "email" : probeText, "email_address" : probeText, "emailAddress" : probeText, "password": probeText, "name": probeText, "firstname": probeText, "first": probeText, "last": probeText, "fname": "'", "lname": probeText, "entry" : probeText, "blog" : "add", "form" : "submit"}
 			html = session.post(targetURL, data)
 			if(html.status_code == 400 or html.status_code == 404 or html.status_code == 403 or html.status_code == 405) :
 				raise Exception
-			html = BeautifulSoup(html.text, "html.parser")
+			# html = BeautifulSoup(html.text, "html.parser")
 			if(probeText == SQLiTexts[2] or probeText == SQLiTexts[3]) :
 				vulnerable = checkIfSQLi(html, True)
 			else :
@@ -110,10 +112,14 @@ def probeFoundSQLiVulnerability(html, targetURL, inputField, session) :
 				vuln = vuln_page.VulnPage(nameOfPage, targetURL, ["SQL"], data, 1, symbol)
 				vulnerabilities.append(vuln)
 				return probeText
+			else :
+				raise Exception
 		except :
 			try :
 				name = inputField.attrs['name']
 				queryURL = targetURL + "?" + name + "=" + probeText
+				if ("sqli" in targetURL):
+					queryURL += "&action=search"
 				html = session.get(queryURL)
 				html = BeautifulSoup(html.text, "html.parser")
 				vulnerable = checkIfSQLi(html)

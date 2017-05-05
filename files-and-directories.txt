@@ -4,6 +4,10 @@ LC_MESSAGES
 js
 default.php
 index.php
+sqli_16.php
+sqli_7.php
+sqli_3.php
+sqli_1.php
 tmpl
 lang
 default
