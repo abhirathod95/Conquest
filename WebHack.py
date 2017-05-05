@@ -153,8 +153,8 @@ if automate_login:
 			temp=s.post(url, data=values)
 
 			print('POSTING: url = '+url)
-			print('html user field: '+formusername+'    username: '+username)
-			print('html password field: '+formpassword+'    password: '+password)
+			# print('html user field: '+formusername+'    username: '+username)
+			# print('html password field: '+formpassword+'    password: '+password)
 
 	alreadySpidered = []
 	spider()
