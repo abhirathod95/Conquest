@@ -28,12 +28,12 @@ def spider():
 						if ('http' in spiderLink) or ('www' in spiderLink):
 							if urlnohttp in spiderLink:
 								existingPages.append(spiderLink.split(urlnohttp, 1)[1])
-								# print('spider appended: ' + spiderLink.split(urlnohttp, 1)[1])
+								print('Spider found: ' + spiderLink.split(urlnohttp, 1)[1])
 						elif '/' in spiderLink:
-							# print('spider appended elif: ' + spiderLink)
+							print('Spider found: ' + spiderLink)
 							existingPages.append(spiderLink)
 						else:
-							# print('spider appended else: ' + spiderLink)
+							print('Spider found: ' + spiderLink)
 							existingPages.append('/' + spiderLink)
 	print('Spider finished.')
 
@@ -46,12 +46,12 @@ def forced_browse(ses):
 	with open('./files-and-directories.txt') as browselist:
 		for newline in browselist:
 			line = newline.rstrip('\n')
-			print('browsing: '+line)
+			# print('browsing: '+line)
 			# Try a HEAD request to the server with directory from the list.
 			forced = ses.head(baseURL + '/' + line)
 			# If the returned status code is not in the 400s or 500s, page exists.
 			if forced.status_code < 400:
-				# print('forced browse found: ' + line)
+				print('Forced browse found: ' + line)
 				if '/'+line not in existingPages:
 					# print('forced browse appended: ' + line)
 					existingPages.append('/'+line)
@@ -121,7 +121,7 @@ if not automate_login:
 	forced_browse(None)
 	ProbeWebsite.probeTheWebsite(baseURL, existingPages, None)
 
-
+# Look for login pages, and any input fields that are for username and password
 if automate_login:
 	loginpages = []
 	# Do authentication if credentials provided.
