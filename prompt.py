@@ -40,7 +40,7 @@ def hack(login, vulnerabilities, session=None):
 	while answer != 'y' and answer != 'Y' and answer == 'N' and answer == 'n':
 		answer = input("Invalid input. Please enter either Y/n or N/n: ")
 	if answer == 'Y' or answer == 'y':
-		process = subprocess.Popen(['python', 'attacker_server.py'])
+		process = subprocess.Popen(['python3', 'attacker_server.py'])
 	else:
 		process = None
 
