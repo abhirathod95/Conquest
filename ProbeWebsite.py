@@ -17,7 +17,7 @@ def cleanVulnerabilities() :
 	tempVulnerabilities = {}
 	v = vulnerabilities.copy()
 	for vulnerability in v :
-		string = vulnerability.vuln
+		string = vulnerability.vuln[0]		#TODO if time permit
 		string += vulnerability.url
 		string += str(vulnerability.req_type)
 		try :
@@ -60,7 +60,7 @@ def probeFoundXSSVulnerability(html, targetURL, inputField, session) :
 			nameOfPage = targetURL.split("/")
 			length = len(nameOfPage)
 			nameOfPage = nameOfPage[length-1]
-			vuln = vuln_page.VulnPage(nameOfPage, targetURL, "XSS", data, 1, 0)
+			vuln = vuln_page.VulnPage(nameOfPage, targetURL, ["XSS"], data, 1, 0)
 			vulnerabilities.append(vuln)
 			return successfulText
 	except :
@@ -107,7 +107,7 @@ def probeFoundSQLiVulnerability(html, targetURL, inputField, session) :
 					symbol = 0
 				else :
 					symbol = 1
-				vuln = vuln_page.VulnPage(nameOfPage, targetURL, "SQL", data, 1, symbol)
+				vuln = vuln_page.VulnPage(nameOfPage, targetURL, ["SQL"], data, 1, symbol)
 				vulnerabilities.append(vuln)
 				return probeText
 		except :
@@ -125,7 +125,7 @@ def probeFoundSQLiVulnerability(html, targetURL, inputField, session) :
 						symbol = 0
 					else:
 						symbol = 1
-					vuln = vuln_page.VulnPage(nameOfPage, targetURL, "SQL", {"name" : name}, 0, symbol)
+					vuln = vuln_page.VulnPage(nameOfPage, targetURL, ["SQL"], {"name" : name}, 0, symbol)
 					vulnerabilities.append(vuln)
 					return probeText
 			except :
