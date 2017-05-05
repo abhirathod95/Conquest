@@ -96,6 +96,7 @@ def hack(login, vulnerabilities, session=None):
 
 		print(payload)
 		print("Sending in customized payload now!")
+		print("Success!")
 
 		data = selected_page.get_data()
 		for x in data.keys():
@@ -115,7 +116,7 @@ def hack(login, vulnerabilities, session=None):
 		#	out_file.write(resp.text)
 
 		test = input("Continue to next page?")
-		
+
 
 	
 
