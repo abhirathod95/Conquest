@@ -144,29 +144,25 @@ def probeFoundSQLiVulnerability(html, targetURL, inputField, session) :
 def examineForVulnerabilities(html, targetURL, element, session):
 	global vulnerabilityCounter
 	pageExploits = {}
-	print("Checking " + str(element) + " on page " + targetURL + " for XSS\n")
 	if ".js" in str(element):
-		print("Examining javascript code for XSS vulnerabilities\n")
 		jsIsVulnerableToXSS = examineJavascriptForXSS(html, targetURL, element, session)
 		if (jsIsVulnerableToXSS):
 			pageExploits["XSS" + str(vulnerabilityCounter)] = str(element)
 			vulnerabilityCounter += 1
-			print("XSS VULNERABILITY FOUND: " + str(element) + " on page " + targetURL + " . Javascript validation is broken.\n")
+			print("XSS VULNERABILITY FOUND: " + str(element) + " on page " + targetURL)
 		else:
-			print("No XSS vulnerabilities immediately found for " + str(element) + " on page " + targetURL + "\nEither element is not vulnerable, or website is good about not leaking information.\n	")
+			print("No XSS vulnerabilities immediately found for page " + targetURL)
 	else:
-		print("Probing with sample input to test for XSS vulnerabilities\n")
 		isVulnerable = probeFoundXSSVulnerability(html, targetURL, element, session)
 		if (isVulnerable) :
 			vulnerabilityCounter += 1
-			print("XSS VULERABILITY FOUND: \" " + str(element) + " \" on page " + targetURL + " . Found using probe-text: \" " + isVulnerable + " \"\n")
+			print("XSS VULERABILITY FOUND:  " + str(element) + "  on page " + targetURL + " . Found using probe-text:  " + isVulnerable)
 		else:
-			print("No XSS vulnerabilities immediately found for " + str(element) + " on page " + targetURL + "\nEither element is not vulnerable, or website is good about not leaking information.\n")
-			print("Probing with sample input to test for SQLi vulnerabilities\n")
+			print("No XSS vulnerabilities immediately found for page " + targetURL)
 			isVulnerable = probeFoundSQLiVulnerability(html, targetURL, element,	session)
 			if(isVulnerable) :
 				vulnerabilityCounter += 1
-				print("SQLi VULNERABILITY FOUND: \" " + str(element) + "\" on page " + targetURL + " . Found using probe-text: \" " + isVulnerable + " \"\n")
+				print("SQLi VULNERABILITY FOUND:  " + str(element) + " on page " + targetURL + " . Found using probe-text:  " + isVulnerable)
 
 	return pageExploits
 
