@@ -1,7 +1,7 @@
 # Conquest
 Usage: 
-python3.6 WebHack.py <target url>
-python3.6 -u <username> -p <password> <target url>
+python3.6 WebHack.py [target url]
+python3.6 -u <[username] -p [password] [target url]
 
 Example:
 python3.6 WebHack.py http://localhost:5000
